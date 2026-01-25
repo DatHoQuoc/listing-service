@@ -50,7 +50,8 @@ server:
   compression:
     enabled: true
   error:
-    include-binding-errors:
+    include-message: always
+    include-binding-errors: always
 
 
 # Logging
