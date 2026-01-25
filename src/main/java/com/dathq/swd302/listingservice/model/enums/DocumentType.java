@@ -1,4 +1,6 @@
 package com.dathq.swd302.listingservice.model.enums;
 
 public enum DocumentType {
+    OWNERSHIP_CERTIFICATE, LAND_USE_CERTIFICATE, BUILDING_PERMIT,
+    CONSTRUCTION_PERMIT, HOUSE_CERTIFICATE, TRANSFER_CONTRACT, OTHER
 }

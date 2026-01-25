@@ -1,0 +1,131 @@
+### Create Draft Listing - Apartment for Sale
+POST http://localhost:8080/api/v1/seller/listings
+Content-Type: application/json
+X-User-Id: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+
+{
+  "title": "Modern 2-Bedroom Apartment in District 1",
+  "description": "Beautiful apartment with city view, fully furnished, near metro station. Perfect for young professionals or small families. Features include modern kitchen, spacious living room, and balcony with skyline views.",
+  "listingType": "SALE",
+  "propertyType": "APARTMENT",
+  "price": 5500000000.00,
+  "priceCurrency": "VND",
+  "negotiable": true,
+  "areaSqm": 85.5,
+  "bedrooms": 2,
+  "bathrooms": 2,
+  "floors": 25,
+  "floorNumber": 18,
+  "yearBuilt": 2020,
+  "wardId": "550e8400-e29b-41d4-a716-446655440001",
+  "provinceId": "550e8400-e29b-41d4-a716-446655440001",
+  "countryId": "550e8400-e29b-41d4-a716-446655440000",
+  "streetAddress": "123 Nguyen Hue Street",
+  "buildingName": "Vinhomes Golden River",
+  "latitude": 10.7769,
+  "longitude": 106.7009
+}
+
+### Create Draft Listing - Villa for Rent
+POST http://localhost:8080/api/v1/seller/listings
+Content-Type: application/json
+X-User-Id: b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22
+
+{
+  "title": "Spacious Villa with Pool - Thao Dien",
+  "description": "Luxury villa in expat-friendly neighborhood. 3 bedrooms, private pool, garden, modern kitchen, and garage for 2 cars.",
+  "listingType": "RENT",
+  "propertyType": "VILLA",
+  "price": 45000000.00,
+  "priceCurrency": "VND",
+  "pricePeriod": "MONTHLY",
+  "negotiable": false,
+  "areaSqm": 250.0,
+  "bedrooms": 3,
+  "bathrooms": 3,
+  "floors": 2,
+  "yearBuilt": 2019,
+  "streetAddress": "456 Thao Dien Road",
+  "latitude": 10.8012,
+  "longitude": 106.7397
+}
+
+### Create Draft Listing - Commercial Office
+POST http://localhost:8080/api/v1/seller/listings
+Content-Type: application/json
+X-User-Id: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+
+{
+  "title": "Commercial Office Space - CBD",
+  "description": "Prime office space in central business district. High-speed internet, 24/7 security, parking available.",
+  "listingType": "LEASE",
+  "propertyType": "COMMERCIAL",
+  "price": 80000000.00,
+  "priceCurrency": "VND",
+  "pricePeriod": "MONTHLY",
+  "negotiable": true,
+  "areaSqm": 150.0,
+  "floors": 40,
+  "floorNumber": 25,
+  "yearBuilt": 2021,
+  "streetAddress": "789 Le Duan Boulevard",
+  "buildingName": "Saigon Trade Center",
+  "latitude": 10.7829,
+  "longitude": 106.6990
+}
+
+### Create Draft Listing - Minimal Required Fields Only
+POST http://localhost:8080/api/v1/seller/listings
+Content-Type: application/json
+X-User-Id: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+
+{
+  "title": "Cozy Studio Apartment",
+  "description": "Small but comfortable studio apartment, perfect for students or single professionals.",
+  "listingType": "RENT",
+  "propertyType": "APARTMENT",
+  "price": 5000000.00,
+  "areaSqm": 30.0
+}
+
+### Create Draft Listing - House for Sale
+POST http://localhost:8080/api/v1/seller/listings
+Content-Type: application/json
+X-User-Id: c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33
+
+{
+  "title": "Family House with Garden - District 2",
+  "description": "Spacious family house with private garden, quiet neighborhood, close to international schools.",
+  "listingType": "SALE",
+  "propertyType": "HOUSE",
+  "price": 12000000000.00,
+  "priceCurrency": "VND",
+  "negotiable": true,
+  "areaSqm": 200.0,
+  "bedrooms": 4,
+  "bathrooms": 3,
+  "floors": 2,
+  "yearBuilt": 2018,
+  "streetAddress": "88 Tran Nao Street",
+  "latitude": 10.7989,
+  "longitude": 106.7456
+}
+
+### Create Draft Listing - Land for Sale
+POST http://localhost:8080/api/v1/seller/listings
+Content-Type: application/json
+X-User-Id: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+
+{
+  "title": "Prime Land Plot - Investment Opportunity",
+  "description": "Excellent location for residential or commercial development. Clean title, all permits ready.",
+  "listingType": "SALE",
+  "propertyType": "LAND",
+  "price": 25000000000.00,
+  "priceCurrency": "VND",
+  "negotiable": true,
+  "areaSqm": 500.0,
+  "streetAddress": "District 9 Development Zone",
+  "latitude": 10.8512,
+  "longitude": 106.7893
+}
