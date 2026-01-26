@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -36,19 +37,19 @@ public class LegalDocument {
 
     // Legal Info
     private String documentNumber;
-    private LocalDate issueDate;
+    private OffsetDateTime issueDate;
     private String issuingAuthority;
-    private LocalDate expiryDate;
+    private OffsetDateTime expiryDate;
 
     // Verification
     private boolean verified = false;
     private UUID verifiedBy; // Admin ID
-    private Instant verifiedAt;
+    private OffsetDateTime verifiedAt;
     private String verificationNotes;
 
     @CreationTimestamp
-    private Instant uploadedAt;
+    private OffsetDateTime uploadedAt;
 
     @UpdateTimestamp
-    private Instant updatedAt;
+    private OffsetDateTime updatedAt;
 }

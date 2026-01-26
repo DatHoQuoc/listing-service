@@ -95,8 +95,8 @@ public class Listing {
 
     private String buildingName;
 
-//    @Column(columnDefinition = "geometry(Point,4326)")
-//    private Point geolocation;
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point geolocation;
 
     // --- Media (JSONB) ---
     @Column(columnDefinition = "TEXT")

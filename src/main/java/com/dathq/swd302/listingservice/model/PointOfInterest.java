@@ -28,8 +28,8 @@ public class PointOfInterest {
     @Column(nullable = false)
     private String category;
 
-//    @Column(columnDefinition = "geometry(Point,4326)")
-//    private Point geolocation;
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point geolocation;
 
     private Integer distanceMeters;
 

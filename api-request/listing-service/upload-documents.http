@@ -1,0 +1,91 @@
+### Global Variables
+@host = http://localhost:8080
+@listingId = fbbb963b-60c5-427b-85d9-8b6ff7a6449f
+@userId = a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+@documentId = c563dcca-3aad-412a-a870-7e2bf59ed690
+
+### 1. Upload Single Document
+# @name upload_document
+POST {{host}}/api/v1/listings/{{listingId}}/documents
+Content-Type: multipart/form-data; boundary=boundary
+X-User-Id: {{userId}}
+
+--boundary
+Content-Disposition: form-data; name="data"
+Content-Type: application/json
+
+{
+  "documentType": "OWNERSHIP_CERTIFICATE",
+  "documentNumber": "DOC-001",
+  "issueDate": "2023-01-01T10:00:00Z",
+  "issuingAuthority": "City Land Department",
+  "expiryDate": "2030-01-01T10:00:00Z"
+}
+--boundary
+Content-Disposition: form-data; name="file"; filename="test-document.pdf"
+Content-Type: application/pdf
+
+< ./test-document.pdf
+--boundary--
+
+### 2. Get All Documents for Listing
+GET {{host}}/api/v1/listings/{{listingId}}/documents
+X-User-Id: {{userId}}
+
+### 3. Get Documents by Type
+GET {{host}}/api/v1/listings/{{listingId}}/documents/type/OWNERSHIP_CERTIFICATE
+X-User-Id: {{userId}}
+
+### 4. Update Document Metadata
+PUT {{host}}/api/v1/listings/{{listingId}}/documents/{{documentId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "documentType": "OWNERSHIP_CERTIFICATE",
+  "documentNumber": "DOC-001-UPDATED",
+  "issueDate": "2023-01-01T10:00:00Z",
+  "issuingAuthority": "National Land Department",
+  "expiryDate": "2035-01-01T10:00:00Z"
+}
+
+### 5. Get Download URL
+GET {{host}}/api/v1/listings/{{listingId}}/documents/{{documentId}}/download
+X-User-Id: {{userId}}
+
+### 6. Delete Document
+DELETE {{host}}/api/v1/listings/{{listingId}}/documents/{{documentId}}
+X-User-Id: {{userId}}
+
+### 7. Batch Upload Documents
+POST {{host}}/api/v1/listings/{{listingId}}/documents/batch
+Content-Type: multipart/form-data; boundary=boundary
+X-User-Id: {{userId}}
+
+--boundary
+Content-Disposition: form-data; name="data"
+Content-Type: application/json
+
+[
+  {
+    "documentType": "HOUSE_CERTIFICATE",
+    "documentNumber": "TAX-2023",
+    "issuingAuthority": "Tax Office"
+  },
+  {
+    "documentType": "BUILDING_PERMIT",
+    "documentNumber": "PERMIT-555",
+    "issuingAuthority": "Construction Dept"
+  }
+]
+--boundary
+Content-Disposition: form-data; name="files"; filename="tax.pdf"
+Content-Type: application/pdf
+
+< ./test-document.pdf
+--boundary
+Content-Disposition: form-data; name="files"; filename="permit.pdf"
+Content-Type: application/pdf
+
+< ./test-document.pdf
+--boundary--
