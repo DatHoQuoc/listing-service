@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
-import org.locationtech.jts.geom.Point; // Requires Hibernate Spatial
+import org.postgis.Point;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -128,7 +128,7 @@ public class Listing {
     private int creditsRefunded = 0;
 
     // --- Relationships ---
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "listing_amenities",
             joinColumns = @JoinColumn(name = "listing_id"),

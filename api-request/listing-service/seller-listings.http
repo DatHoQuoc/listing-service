@@ -1,0 +1,107 @@
+### Global Variables
+@host = http://localhost:8080
+@baseUrl = {{host}}/api/v1/seller/listings
+@userId = 123e4567-e89b-12d3-a456-426614174000
+
+# REPLACE THESE WITH REAL IDS FROM YOUR DATABASE
+@wardId = 550e8400-e29b-41d4-a716-446655440000
+@amenityId1 = 770e8400-e29b-41d4-a716-446655440001
+@amenityId2 = 770e8400-e29b-41d4-a716-446655440002
+
+### ============================================================================
+### 1. DRAFT CREATION & UPDATES
+### ============================================================================
+
+### 1. Create a New Draft Listing
+# @name create_draft
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "title": "Modern Studio in Tech Park",
+  "description": "Perfect for singles or couples. Near software park.",
+  "price": 500.00,
+  "area": 45.0,
+  "listingType": "RENT",
+  "propertyType": "APARTMENT",
+  "direction": "NORTH",
+  "bedrooms": 1,
+  "bathrooms": 1,
+  "latitude": 10.8231,
+  "longitude": 106.6297
+}
+
+### Capture the Listing ID automatically for next steps
+@listingId = {{create_draft.response.body.listingId}}
+
+### 2. Update Listing Basic Info
+PUT {{baseUrl}}/{{listingId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "title": "Modern Studio - Price Drop!",
+  "description": "Updated description: Now includes free gym access.",
+  "price": 450.00,
+  "area": 45.0,
+  "listingType": "RENT",
+  "propertyType": "APARTMENT",
+  "direction": "NORTH",
+  "bedrooms": 1,
+  "bathrooms": 1
+}
+
+### 3. Update Listing Location (Ward & Coordinates)
+# Note: Ensure wardId exists in your DB
+PUT {{baseUrl}}/{{listingId}}/location?wardId={{wardId}}&streetAddress=123 Tech Street&latitude=10.8235&longitude=106.6300
+X-User-Id: {{userId}}
+
+### 4. Update Listing Amenities
+# Note: Ensure amenityIds exist in your DB
+PUT {{baseUrl}}/{{listingId}}/amenities
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+[
+  "{{amenityId1}}",
+  "{{amenityId2}}"
+]
+
+### ============================================================================
+### 2. DATA RETRIEVAL
+### ============================================================================
+
+### 5. Get Listing Details (Single)
+GET {{baseUrl}}/{{listingId}}
+X-User-Id: {{userId}}
+
+### 6. Get All My Listings (Paginated)
+GET {{baseUrl}}?page=0&size=5&sort=createdAt,desc
+X-User-Id: {{userId}}
+
+### 7. Get My Listings by Status (DRAFT)
+GET {{baseUrl}}/status/DRAFT
+X-User-Id: {{userId}}
+
+### ============================================================================
+### 3. SUBMISSION WORKFLOW
+### ============================================================================
+
+### 8. Submit Listing for Review
+# Status changes from DRAFT -> PENDING_REVIEW
+PUT {{baseUrl}}/{{listingId}}/submit
+X-User-Id: {{userId}}
+
+### 9. Cancel Submission
+# Status changes from PENDING_REVIEW -> DRAFT
+PUT {{baseUrl}}/{{listingId}}/cancel
+X-User-Id: {{userId}}
+
+### ============================================================================
+### 4. CLEANUP
+### ============================================================================
+
+### 10. Delete Draft Listing (Soft Delete)
+DELETE {{baseUrl}}/{{listingId}}
+X-User-Id: {{userId}}
