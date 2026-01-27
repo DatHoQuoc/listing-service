@@ -1,8 +1,8 @@
 ### Global Variables
 @host = http://localhost:8080
-@listingId = fbbb963b-60c5-427b-85d9-8b6ff7a6449f
+@listingId = 6d4f41b8-3965-4bb3-b227-e68e586cbca6
 @userId = a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
-@documentId = c563dcca-3aad-412a-a870-7e2bf59ed690
+@documentId = 240cf61a-057d-4370-a91a-434c10d6fb97
 
 ### 1. Upload Single Document
 # @name upload_document

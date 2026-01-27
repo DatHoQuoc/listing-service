@@ -161,9 +161,13 @@ public class Listing {
 
     // Helper POJO for JSON mapping
     @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class ImageMetadata {
         private String url;
         private int order;
         private String caption;
+        private OffsetDateTime uploadedAt;
     }
 }

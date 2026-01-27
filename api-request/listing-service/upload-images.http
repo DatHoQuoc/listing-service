@@ -1,0 +1,101 @@
+### Global Variables
+@host = http://localhost:8080
+@listingId = 6d4f41b8-3965-4bb3-b227-e68e586cbca6
+@userId = a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+@sceneId = {{add_scene.response.body.sceneId}}
+
+### 1. Create Virtual Tour Container
+POST {{host}}/api/v1/listings/{{listingId}}/tours
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "tourUrl": "",
+  "tourProvider": "Internal"
+}
+
+### 2. Add Tour Scene (Multipart with JSON Data)
+# @name add_scene
+POST {{host}}/api/v1/listings/{{listingId}}/tours/scenes
+Content-Type: multipart/form-data; boundary=boundary
+X-User-Id: {{userId}}
+
+--boundary
+Content-Disposition: form-data; name="data"
+Content-Type: application/json
+
+{
+  "sceneName": "Living Room",
+  "positionX": 0.0,
+  "positionY": 90.0,
+  "positionZ": 120.0,
+  "hotspotsJson": [
+    {
+      "id": 1,
+      "type": "info",
+      "text": "Smart TV",
+      "pitch": 10,
+      "yaw": 150
+    },
+    {
+      "id": 2,
+      "type": "scene_link",
+      "targetSceneId": "next-uuid-here",
+      "pitch": 0,
+      "yaw": 180
+    }
+  ]
+}
+--boundary
+Content-Disposition: form-data; name="file"; filename="panorama.jpg"
+Content-Type: image/jpeg
+
+< ./panorama.jpg
+--boundary--
+
+### 3. Get Virtual Tour (Includes Scenes)
+GET {{host}}/api/v1/listings/{{listingId}}/tours
+X-User-Id: {{userId}}
+
+### 4. Update Tour Scene Metadata
+PUT {{host}}/api/v1/listings/{{listingId}}/tours/scenes/{{sceneId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "sceneName": "Living Room - Updated",
+  "positionX": 0.0,
+  "positionY": 100.0,
+  "positionZ": 110.0,
+  "hotspotsJson": [
+    {
+      "id": 1,
+      "type": "info",
+      "text": "New Sofa",
+      "pitch": 5,
+      "yaw": 140
+    }
+  ]
+}
+
+### 5. Reorder Scenes
+PUT {{host}}/api/v1/listings/{{listingId}}/tours/scenes/reorder
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+[
+  "{{sceneId}}",
+  "another-uuid-if-you-have-one"
+]
+
+### 6. Publish Tour
+PUT {{host}}/api/v1/listings/{{listingId}}/tours/publish
+X-User-Id: {{userId}}
+
+### 7. Delete Scene
+DELETE {{host}}/api/v1/listings/{{listingId}}/tours/scenes/{{sceneId}}
+X-User-Id: {{userId}}
+
+### 8. Delete Entire Tour
+DELETE {{host}}/api/v1/listings/{{listingId}}/tours
+X-User-Id: {{userId}}
