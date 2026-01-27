@@ -79,20 +79,9 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Flyway (Database Migration) -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
 
-        <!-- Flyway PostgreSQL Support -->
-        <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.11.2</version>
-            <scope>runtime</scope>
-        </dependency>
+
+
 
         <!-- HikariCP (Connection Pool - included in spring-boot-starter-data-jpa) -->
 
@@ -321,12 +310,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- MockMvc WebTestClient -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-            <scope>test</scope>
-        </dependency>
+
 
         <!-- AssertJ (Better Assertions) -->
         <dependency>
@@ -435,25 +419,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.25.1:exe:${os.detected.classifier}</protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.60.0:exe:${os.detected.classifier}</pluginArtifact>
-                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -481,16 +447,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>10.4.1</version>
-                <configuration>
-                    <url>jdbc:postgresql://localhost:5432/listing_db</url>
-                    <user>admin</user>
-                    <password>admin123</password>
-                </configuration>
-            </plugin>
+
         </plugins>
 
         <extensions>

@@ -23,10 +23,13 @@ import com.dathq.swd302.listingservice.service.ListingService;
 import com.dathq.swd302.listingservice.service.ListingValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.postgis.Point;
+import org.locationtech.jts.geom.Point;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -69,9 +72,17 @@ public class ListingServiceImpl implements ListingService {
         listing.setCreditsRefunded(0);
         listing.setCreatedAt(OffsetDateTime.now());
         listing.setUpdatedAt(OffsetDateTime.now());
-
         if (request.getLatitude() != null && request.getLongitude() != null) {
-            Point point = new Point(request.getLongitude(), request.getLatitude());
+
+            GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+
+            Coordinate coordinate = new Coordinate(request.getLongitude(), request.getLatitude());
+
+
+            Point point = geometryFactory.createPoint(coordinate);
+
+
             listing.setGeolocation(point);
         }
         Listing savedListing = listingRepository.save(listing);
@@ -99,7 +110,16 @@ public class ListingServiceImpl implements ListingService {
         listingMapper.updateEntityFromRequest(request, listing);
 
         if (request.getLatitude() != null && request.getLongitude() != null) {
-            Point point = new Point(request.getLongitude(), request.getLatitude());
+
+            GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+
+            Coordinate coordinate = new Coordinate(request.getLongitude(), request.getLatitude());
+
+
+            Point point = geometryFactory.createPoint(coordinate);
+
+
             listing.setGeolocation(point);
         }
 
@@ -306,7 +326,9 @@ public class ListingServiceImpl implements ListingService {
         listing.setStreetAddress(streetAddress);
 
         if (latitude != null && longitude != null) {
-            Point point = new Point(longitude, latitude);
+            GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+            Coordinate coordinate = new Coordinate(latitude, longitude);
+            Point point = geometryFactory.createPoint(coordinate);
             listing.setGeolocation(point);
         }
 
