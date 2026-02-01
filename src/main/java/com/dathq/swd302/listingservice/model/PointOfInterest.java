@@ -4,6 +4,7 @@ package com.dathq.swd302.listingservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,5 +35,5 @@ public class PointOfInterest {
     private Integer distanceMeters;
 
     @CreationTimestamp
-    private Instant createdAt;
+    private OffsetDateTime createdAt;
 }

@@ -8,6 +8,7 @@ import org.hibernate.annotations.*;
 import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,5 +38,5 @@ public class ListingReview {
     private JsonNode changesRequestedJson;
 
     @CreationTimestamp
-    private Instant reviewedAt;
+    private OffsetDateTime reviewedAt;
 }

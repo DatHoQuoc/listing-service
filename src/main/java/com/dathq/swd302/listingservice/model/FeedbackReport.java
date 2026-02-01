@@ -10,6 +10,7 @@ import org.hibernate.annotations.*;
 import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 @Entity
@@ -34,7 +35,7 @@ public class FeedbackReport {
     private BigDecimal aiConfidenceScore;
 
     private UUID reviewedByStaffId;
-    private Instant reviewedAt;
+    private OffsetDateTime reviewedAt;
 
     private boolean isResubmission = false;
 
@@ -46,8 +47,8 @@ public class FeedbackReport {
     private List<FeedbackItem> items;
 
     @CreationTimestamp
-    private Instant createdAt;
+    private OffsetDateTime createdAt;
 
     @UpdateTimestamp
-    private Instant updatedAt;
+    private OffsetDateTime updatedAt;
 }

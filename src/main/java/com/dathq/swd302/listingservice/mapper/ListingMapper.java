@@ -6,6 +6,8 @@ import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
 import com.dathq.swd302.listingservice.dto.response.ListingDetailResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingResponse;
 import com.dathq.swd302.listingservice.model.Listing;
+import com.dathq.swd302.listingservice.model.enums.ListingType;
+import com.dathq.swd302.listingservice.model.enums.PropertyType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -36,6 +38,11 @@ public interface ListingMapper {
     @Mapping(target = "reviewedAt", ignore = true)
     @Mapping(target = "publishedAt", ignore = true)
     @Mapping(target = "expiredAt", ignore = true)
+    @Mapping(target = "listingType", source = "listingType")
+    @Mapping(target = "propertyType", source = "propertyType")
+    @Mapping(target = "ward.wardId", source = "wardId")
+    @Mapping(target = "province.provinceId", source = "provinceId")
+    @Mapping(target = "country.countryId", source = "countryId")
     Listing toEntity(CreateListingRequest request);
 
     ListingResponse toResponse(Listing listing);
@@ -63,4 +70,12 @@ public interface ListingMapper {
     @Mapping(target = "publishedAt", ignore = true)
     @Mapping(target = "expiredAt", ignore = true)
     void updateEntityFromRequest(UpdateListingRequest request, @MappingTarget Listing listing);
+
+    default ListingType mapListingType(String type) {
+        return type != null ? ListingType.valueOf(type.toUpperCase()) : null;
+    }
+
+    default PropertyType mapPropertyType(String type) {
+        return type != null ? PropertyType.valueOf(type.toUpperCase()) : null;
+    }
 }

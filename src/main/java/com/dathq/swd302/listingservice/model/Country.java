@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.List;
 
@@ -27,8 +28,8 @@ public class Country {
     private List<Province> provinces;
 
     @CreationTimestamp
-    private Instant createdAt;
+    private OffsetDateTime createdAt;
 
     @UpdateTimestamp
-    private Instant updatedAt;
+    private OffsetDateTime updatedAt;
 }

@@ -120,6 +120,7 @@ public class VirtualTourServiceImpl implements VirtualTourService {
     }
 
     @Override
+    @Transactional
     public TourSceneResponse addTourScene(UUID userId, UUID listingId, MultipartFile file, AddTourSceneRequest request) {
         log.info("Adding tour scene to listing: {}", listingId);
 
@@ -141,7 +142,7 @@ public class VirtualTourServiceImpl implements VirtualTourService {
         int nextOrder = virtualTour.getTotalScenes() + 1;
 
         TourScene tourScene = new TourScene();
-        tourScene.setSceneId(virtualTour.getTourId());
+        tourScene.setVirtualTour(virtualTour);
         tourScene.setSceneName(request.getSceneName());
         tourScene.setPanoramaUrl(fileUrl);
         tourScene.setSceneOrder(nextOrder);
@@ -153,7 +154,7 @@ public class VirtualTourServiceImpl implements VirtualTourService {
 
         TourScene savedScene = tourSceneRepository.save(tourScene);
 
-        virtualTour.setTotalScenes(virtualTour.getTotalScenes() + 1);
+        virtualTour.setTotalScenes(nextOrder);
         virtualTour.setUpdatedAt(OffsetDateTime.now());
         virtualTourRepository.save(virtualTour);
 

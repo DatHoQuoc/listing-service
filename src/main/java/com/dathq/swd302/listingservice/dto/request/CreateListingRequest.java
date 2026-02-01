@@ -59,11 +59,11 @@ public class CreateListingRequest {
     @Max(value = 2100, message = "Year built must be valid")
     private Integer yearBuilt;
 
-    private UUID wardId;
+        private UUID wardId;
 
-    private UUID provinceId;
+        private UUID provinceId;
 
-    private UUID countryId;
+        private UUID countryId;
 
     @Size(max = 500, message = "Street address must not exceed 500 characters")
     private String streetAddress;

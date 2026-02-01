@@ -7,6 +7,8 @@ import com.dathq.swd302.listingservice.dto.response.ListingDetailResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingResponse;
 import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import com.dathq.swd302.listingservice.service.ListingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,12 +25,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/seller/listings")
 @RequiredArgsConstructor
+@Tag(name = "Seller", description = "API for seller create listing")
 public class SellerListingController {
     private final ListingService listingService;
 
     // --- 1. Create & Update Drafts ---
 
     @PostMapping
+    @Operation(summary = "Create draft", description = "")
     public ResponseEntity<ListingResponse> createDraftListing(
             @RequestHeader("X-User-Id") UUID userId,
             @Valid @RequestBody CreateListingRequest request) {

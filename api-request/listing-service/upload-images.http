@@ -1,6 +1,6 @@
 ### Global Variables
 @host = http://localhost:8080
-@listingId = 6d4f41b8-3965-4bb3-b227-e68e586cbca6
+@listingId = 930ae22a-2973-4e7d-97eb-c6dd105cc198
 @userId = a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 @sceneId = {{add_scene.response.body.sceneId}}
 
