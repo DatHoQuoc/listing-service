@@ -69,29 +69,6 @@ services:
     networks:
       - listing-network
 
-  # PostgreSQL Database
-  listing-service-db:
-    image: postgis/postgis:15-3.4
-    container_name: listing-service-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-listing_db}
-      POSTGRES_USER: ${DB_USER:-admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin123}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "${DB_PORT:-5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./init-db:/docker-entrypoint-initdb.d
-    networks:
-      - listing-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin} -d ${DB_NAME:-listing_db}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # MinIO Object Storage
   minio:
     image: minio/minio:latest
@@ -123,9 +100,9 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/${DB_NAME:-listing_db}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER:-admin}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-admin123}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://192.168.1.80:5432/${DB_NAME:-listing_db}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD:-minioadmin123}
@@ -133,8 +110,6 @@ services:
     ports:
       - "3111:8080"
     depends_on:
-      listing-service-db:
-        condition: service_healthy
       minio:
         condition: service_healthy
       kafka:
@@ -145,8 +120,6 @@ services:
       - app-logs:/app/logs
 
 volumes:
-  postgres-data:
-    driver: local
   minio-data:
     driver: local
   app-logs:
