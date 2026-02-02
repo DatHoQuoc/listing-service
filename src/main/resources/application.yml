@@ -46,6 +46,7 @@ spring:
         linger.ms: 10
         batch.size: 16384
         compression.type: snappy
+        spring.json.add.type.headers: false
 
     consumer:
       group-id: listing-service-group

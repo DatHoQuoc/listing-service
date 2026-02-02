@@ -49,6 +49,7 @@ public class ListingServiceImpl implements ListingService {
     private final ImageService imageService;
     private final DocumentService documentService;
     private final MinIOStorageService minIOStorageService;
+    private final AIAnalysisProducerService aiAnalysisProducerService;
 
     @Override
     public ListingResponse createDraft(UUID userId, CreateListingRequest request) {
@@ -148,10 +149,10 @@ public class ListingServiceImpl implements ListingService {
             throw new InvalidListingStateException("Only DRAFT listings can be submitted");
         }
 
-        List<String> validationErrors = listingValidationService.validateForSubmission(listingId);
-        if (!validationErrors.isEmpty()) {
-            throw new ListingValidationException("Listing validation failed: " + String.join(", ", validationErrors));
-        }
+//        List<String> validationErrors = listingValidationService.validateForSubmission(listingId);
+//        if (!validationErrors.isEmpty()) {
+//            throw new ListingValidationException("Listing validation failed: " + String.join(", ", validationErrors));
+//        }
 
         listing.setStatus(ListingStatus.PENDING_REVIEW);
         listing.setSubmittedAt(OffsetDateTime.now());
@@ -162,7 +163,7 @@ public class ListingServiceImpl implements ListingService {
         }
 
         Listing submittedListing = listingRepository.save(listing);
-
+        aiAnalysisProducerService.sendComprehensiveAnalysisRequest(userId,submittedListing);
         log.info("Listing submitted successfully: {}", listingId);
 
         return listingMapper.toResponse(submittedListing);

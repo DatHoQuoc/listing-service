@@ -90,8 +90,8 @@ X-User-Id: {{userId}}
 
 ### 8. Submit Listing for Review
 # Status changes from DRAFT -> PENDING_REVIEW
-PUT {{baseUrl}}/{{listingId}}/submit
-X-User-Id: {{userId}}
+PUT {{baseUrl}}/930ae22a-2973-4e7d-97eb-c6dd105cc198/submit
+X-User-Id: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 
 ### 9. Cancel Submission
 # Status changes from PENDING_REVIEW -> DRAFT
