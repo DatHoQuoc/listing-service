@@ -171,10 +171,15 @@
         <!-- gRPC Stub -->
         <!-- Source: https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
         <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+
+        <!-- Kafka Clients -->
+        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>4.1.1</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>

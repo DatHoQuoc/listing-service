@@ -34,6 +34,31 @@ spring:
   sql:
     init:
       mode: embedded
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        linger.ms: 10
+        batch.size: 16384
+        compression.type: snappy
+
+    consumer:
+      group-id: listing-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        max.poll.records: 100
+        session.timeout.ms: 30000
+    admin:
+      properties:
+        bootstrap.servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
 
   servlet:
     multipart:
