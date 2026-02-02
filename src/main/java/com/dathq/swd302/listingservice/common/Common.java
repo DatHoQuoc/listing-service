@@ -25,6 +25,6 @@ public class Common {
         if (originalFilename != null && originalFilename.contains(".")) {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        return "listings/" + listingId + "/360-images/" + UUID.randomUUID() + extension;
+        return "listings/" + listingId + "/" + UUID.randomUUID() + extension;
     }
 }

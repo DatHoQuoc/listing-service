@@ -87,9 +87,19 @@ public class VirtualTourServiceImpl implements VirtualTourService {
                 .orElseThrow(() -> new VirtualTourNotFoundException("Virtual tour not found for listing: " + listingId));
 
         VirtualTourResponse response = virtualTourMapper.toResponse(virtualTour);
-
+        if (response.getTourUrl() != null && !response.getTourUrl().isEmpty()) {
+            response.setTourUrl(minIOStorageService.getFileUrl(response.getTourUrl()));
+        }
         List<TourScene> scenes = tourSceneRepository.findByVirtualTour_TourIdOrderBySceneOrder(virtualTour.getTourId());
-        response.setScenes(virtualTourMapper.toSceneResponseList(scenes));
+        List<TourSceneResponse> sceneResponses = virtualTourMapper.toSceneResponseList(scenes);
+        sceneResponses.forEach(scene -> {
+            if (scene.getPanoramaUrl() != null && !scene.getPanoramaUrl().isEmpty()) {
+                // Gọi MinIO service để lấy link thật cho ảnh panorama
+                String fullPanoramaUrl = minIOStorageService.generatePresignedUrl(scene.getPanoramaUrl(), 3600);
+                scene.setPanoramaUrl(fullPanoramaUrl);
+            }
+        });
+        response.setScenes(sceneResponses);
 
         return response;
     }

@@ -168,19 +168,24 @@
         </dependency>
 
         <!-- gRPC Protobuf -->
+        <!-- gRPC Stub -->
+        <!-- Source: https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>4.1.1</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
             <version>1.60.0</version>
         </dependency>
-
-        <!-- gRPC Stub -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
             <version>1.60.0</version>
         </dependency>
-
         <!-- Protobuf Java -->
         <dependency>
             <groupId>com.google.protobuf</groupId>

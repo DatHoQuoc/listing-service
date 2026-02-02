@@ -149,7 +149,7 @@ public class ImageServiceImpl implements ImageService {
 
         return images.stream()
                 .map(img -> ImageUploadResponse.builder()
-                        .url(img.getUrl())
+                        .url(minIOStorageService.generatePresignedUrl(img.getUrl(), 3600))
                         .order(img.getOrder())
                         .caption(img.getCaption())
                         .uploadedAt(img.getUploadedAt())

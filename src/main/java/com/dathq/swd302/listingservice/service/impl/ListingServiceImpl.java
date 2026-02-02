@@ -48,6 +48,7 @@ public class ListingServiceImpl implements ListingService {
     private final ListingValidationService listingValidationService;
     private final ImageService imageService;
     private final DocumentService documentService;
+    private final MinIOStorageService minIOStorageService;
 
     @Override
     public ListingResponse createDraft(UUID userId, CreateListingRequest request) {
@@ -199,7 +200,20 @@ public class ListingServiceImpl implements ListingService {
         log.info("Fetching all listings for user: {}", userId);
 
         List<Listing> listings = listingRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        return listingMapper.toResponseList(listings);
+
+        return listings.stream()
+                .map(listing -> {
+                    ListingResponse response = listingMapper.toResponse(listing);
+                    String imageKey = listing.getFeaturedImageUrl();
+                    if (imageKey != null && !imageKey.isEmpty()) {
+                        // Gọi Minio lấy URL (Presigned hoặc Public URL)
+                        String fullUrl = minIOStorageService.generatePresignedUrl(imageKey, 3600);
+                        response.setFeaturedImageUrl(fullUrl);
+                        log.info("Fetched featured image url: {}", fullUrl);
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
