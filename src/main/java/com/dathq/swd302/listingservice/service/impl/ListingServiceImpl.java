@@ -222,7 +222,14 @@ public class ListingServiceImpl implements ListingService {
         log.info("Fetching paginated listings for user: {}", userId);
 
         Page<Listing> listings = listingRepository.findByUserId(userId, pageable);
-        return listings.map(listingMapper::toResponse);
+        return listings.map(listing -> {
+            ListingResponse response = listingMapper.toResponse(listing);
+            List<String> imageUrls = imageService.getListingImages(listing.getListingId()).stream().map(img -> img.getUrl()).collect(Collectors.toList());
+            if (!imageUrls.isEmpty()) {
+                response.setFeaturedImageUrl(imageUrls.get(0));
+            }
+            return response;
+        });
     }
 
     @Override
