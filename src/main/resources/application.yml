@@ -68,7 +68,8 @@ spring:
 
 # MinIO Configuration
 minio:
-  url: ${MINIO_URL:http://localhost:9000}
+#  url: ${MINIO_URL:http://localhost:9000}
+  url: ${MINIO_URL:https://api.minio.maik.io.vn}
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin123}
   bucket-name: listings
@@ -104,3 +105,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+springdoc:
+  default-produces-media-type: application/json
+  swagger-ui:
+    path: /swagger-ui.html

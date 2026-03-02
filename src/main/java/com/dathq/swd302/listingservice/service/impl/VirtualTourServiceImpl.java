@@ -15,15 +15,16 @@ import com.dathq.swd302.listingservice.repository.ListingRepository;
 import com.dathq.swd302.listingservice.repository.TourSceneRepository;
 import com.dathq.swd302.listingservice.repository.VirtualTourRepository;
 import com.dathq.swd302.listingservice.service.VirtualTourService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dathq.swd302.listingservice.common.Common.generate360FileName;
@@ -161,13 +162,13 @@ public class VirtualTourServiceImpl implements VirtualTourService {
         tourScene.setPositionZ(request.getPositionZ());
         tourScene.setHotspotsJson(request.getHotspotsJson());
         tourScene.setCreatedAt(OffsetDateTime.now());
-
         TourScene savedScene = tourSceneRepository.save(tourScene);
 
         virtualTour.setTotalScenes(nextOrder);
         virtualTour.setUpdatedAt(OffsetDateTime.now());
-        virtualTourRepository.save(virtualTour);
 
+        virtualTourRepository.save(virtualTour);
+        regenerateHotspots(virtualTour.getTourId());
         log.info("Tour scene added: {}", savedScene.getSceneId());
 
         return virtualTourMapper.toSceneResponse(savedScene);
@@ -292,6 +293,7 @@ public class VirtualTourServiceImpl implements VirtualTourService {
 
         virtualTour.setPublished(false);
         virtualTour.setUpdatedAt(OffsetDateTime.now());
+
         virtualTourRepository.save(virtualTour);
 
         log.info("Virtual tour unpublished");
@@ -309,4 +311,53 @@ public class VirtualTourServiceImpl implements VirtualTourService {
     public boolean hasVirtualTour(UUID listingId) {
         return virtualTourRepository.existsByListing_ListingId(listingId);
     }
+
+
+    @Transactional
+    public void regenerateHotspots(UUID virtualTourId){
+        List<TourScene> scenes = tourSceneRepository.findByVirtualTour_TourIdOrderBySceneOrder(virtualTourId);
+
+        for (int i = 0; i < scenes.size(); i++) {
+            TourScene current = scenes.get(i);
+            List<Map<String, Object>> hotspots = new ArrayList<>();
+
+            // Previous scene hotspot
+            if (i > 0) {
+                TourScene prev = scenes.get(i - 1);
+                hotspots.add(Map.of(
+                        "id", System.currentTimeMillis(),
+                        "type", "scene_link",
+                        "targetSceneId", prev.getSceneId().toString(),
+                        "text", prev.getSceneName(),
+                        "yaw", 180.0,   // behind you
+                        "pitch", 0.0
+                ));
+            }
+
+            // Next scene hotspot
+            if (i < scenes.size() - 1) {
+                TourScene next = scenes.get(i + 1);
+                hotspots.add(Map.of(
+                        "id", System.currentTimeMillis() + 1,
+                        "type", "scene_link",
+                        "targetSceneId", next.getSceneId().toString(),
+                        "text", next.getSceneName(),
+                        "yaw", 0.0,    // in front of you
+                        "pitch", 0.0
+                ));
+            }
+
+            current.setHotspotsJson(convertToJson(hotspots));
+            tourSceneRepository.save(current);
+        }
+    }
+
+    private JsonNode convertToJson(List<Map<String, Object>> hotspots) {
+        try {
+            return new ObjectMapper().readTree(new ObjectMapper().writeValueAsString(hotspots));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize hotspots", e);
+        }
+    }
+
 }
