@@ -9,6 +9,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.dathq.swd302.listingservice.common.constant.AppConstants.API_BASE;
 
@@ -21,7 +22,8 @@ public class BeansConfig {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList(API_BASE));
+        config.setAllowedOrigins(List.of("https://estate.maik.io.vn",
+                "http://localhost:5173"));
         config.setAllowedHeaders(Arrays.asList(
                         HttpHeaders.ORIGIN,
                         HttpHeaders.CONTENT_TYPE,
