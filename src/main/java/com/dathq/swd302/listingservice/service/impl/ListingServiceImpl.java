@@ -1,14 +1,13 @@
 package com.dathq.swd302.listingservice.service.impl;
 
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
+import com.dathq.swd302.listingservice.dto.request.LockCreditRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
+import com.dathq.swd302.listingservice.dto.response.CreditLockResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingDetailResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingResponse;
 
-import com.dathq.swd302.listingservice.exception.InvalidListingStateException;
-import com.dathq.swd302.listingservice.exception.ListingNotFoundException;
-import com.dathq.swd302.listingservice.exception.ListingValidationException;
-import com.dathq.swd302.listingservice.exception.UnauthorizedException;
+import com.dathq.swd302.listingservice.exception.*;
 import com.dathq.swd302.listingservice.mapper.ListingMapper;
 import com.dathq.swd302.listingservice.model.Amenity;
 import com.dathq.swd302.listingservice.model.Listing;
@@ -17,10 +16,7 @@ import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import com.dathq.swd302.listingservice.repository.AmenityRepository;
 import com.dathq.swd302.listingservice.repository.ListingRepository;
 import com.dathq.swd302.listingservice.repository.WardRepository;
-import com.dathq.swd302.listingservice.service.DocumentService;
-import com.dathq.swd302.listingservice.service.ImageService;
-import com.dathq.swd302.listingservice.service.ListingService;
-import com.dathq.swd302.listingservice.service.ListingValidationService;
+import com.dathq.swd302.listingservice.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
@@ -50,6 +46,7 @@ public class ListingServiceImpl implements ListingService {
     private final DocumentService documentService;
     private final MinIOStorageService minIOStorageService;
     private final AIAnalysisProducerService aiAnalysisProducerService;
+    private final CreditServiceClient creditServiceClient;
 
     @Override
     public ListingResponse createDraft(UUID userId, CreateListingRequest request) {
@@ -154,17 +151,28 @@ public class ListingServiceImpl implements ListingService {
 //            throw new ListingValidationException("Listing validation failed: " + String.join(", ", validationErrors));
 //        }
 
+        // 2. Lock credit via HTTP (sync) — fail fast before saving
+        CreditLockResponse creditLock = creditServiceClient.lockCreditForPost(
+                userId,
+                new LockCreditRequest(listingId.toString())
+        );
+
+        if (!creditLock.success()) {
+            throw new InsufficientCreditException(creditLock.message());
+        }
+
+
         listing.setStatus(ListingStatus.PENDING_REVIEW);
         listing.setSubmittedAt(OffsetDateTime.now());
         listing.setUpdatedAt(OffsetDateTime.now());
-
-        if (!listing.isFreePost()) {
-            listing.setCreditsLocked(10);
-        }
+        listing.setFreePost(creditLock.freePost());
+        listing.setCreditsLocked(creditLock.creditCost()); // 0 or 10
 
         Listing submittedListing = listingRepository.save(listing);
         aiAnalysisProducerService.sendComprehensiveAnalysisRequest(userId,submittedListing);
-        log.info("Listing submitted successfully: {}", listingId);
+        log.info("Listing submitted successfully: {}, creditCost: {}, freePost: {}",
+                listingId, creditLock.creditCost(), creditLock.freePost());
+
 
         return listingMapper.toResponse(submittedListing);
     }

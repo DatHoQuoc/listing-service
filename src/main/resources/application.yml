@@ -35,7 +35,7 @@ spring:
     init:
       mode: embedded
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka.maik.io.vn:9092}
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -59,7 +59,7 @@ spring:
         session.timeout.ms: 30000
     admin:
       properties:
-        bootstrap.servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+        bootstrap.servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka.maik.io.vn:9092}
 
   servlet:
     multipart:
@@ -110,3 +110,7 @@ springdoc:
   default-produces-media-type: application/json
   swagger-ui:
     path: /swagger-ui.html
+
+services:
+  credit:
+    url: ${CREDIT_URL:http://localhost:8086}
