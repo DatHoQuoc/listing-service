@@ -24,20 +24,14 @@ public class BeansConfig {
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of("https://estate.maik.io.vn",
                 "http://localhost:5173"));
-        config.setAllowedHeaders(Arrays.asList(
-                        HttpHeaders.ORIGIN,
-                        HttpHeaders.CONTENT_TYPE,
-                        HttpHeaders.ACCEPT,
-                        HttpHeaders.AUTHORIZATION,
-                        "x-user-id"
-                )
-        );
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(Arrays.asList(
                 "GET",
                 "POST",
                 "PUT",
                 "DELETE",
-                "PATCH"
+                "PATCH",
+                "OPTIONS"
         ));
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
