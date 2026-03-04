@@ -22,8 +22,7 @@ public class BeansConfig {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("https://estate.maik.io.vn",
-                "http://localhost:5173"));
+        config.setAllowedOrigins(Collections.singletonList(API_BASE));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(Arrays.asList(
                 "GET",
