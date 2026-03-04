@@ -113,4 +113,4 @@ springdoc:
 
 services:
   credit:
-    url: ${CREDIT_URL:http://localhost:8086}
+    url: ${CREDIT_URL:api.estate.maik.io.vn/credit}
