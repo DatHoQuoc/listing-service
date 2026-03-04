@@ -29,7 +29,7 @@ X-User-Id: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 }
 
 ### Create Draft Listing - Villa for Rent
-POST http://localhost:8080/api/v1/seller/listings
+POST https://api.estate.maik.io.vn/listing/api/v1/seller/listings
 Content-Type: application/json
 X-User-Id: b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22
 

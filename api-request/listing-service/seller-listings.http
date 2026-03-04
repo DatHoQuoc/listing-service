@@ -1,5 +1,5 @@
 ### Global Variables
-@host = http://localhost:8080
+@host = https://api.estate.maik.io.vn
 @baseUrl = {{host}}/api/v1/seller/listings
 @userId = 123e4567-e89b-12d3-a456-426614174000
 

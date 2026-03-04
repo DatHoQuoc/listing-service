@@ -16,23 +16,23 @@ import static com.dathq.swd302.listingservice.common.constant.AppConstants.API_B
 @Configuration
 public class BeansConfig {
 
-
-    @Bean
-    public CorsFilter corsFilter(){
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList(API_BASE));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(Arrays.asList(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH",
-                "OPTIONS"
-        ));
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
+//
+//    @Bean
+//    public CorsFilter corsFilter(){
+//        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        final CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        config.setAllowedOrigins(Collections.singletonList(API_BASE));
+//        config.setAllowedOriginPatterns(List.of("*"));
+//        config.setAllowedMethods(Arrays.asList(
+//                "GET",
+//                "POST",
+//                "PUT",
+//                "DELETE",
+//                "PATCH",
+//                "OPTIONS"
+//        ));
+//        source.registerCorsConfiguration("/**", config);
+//        return new CorsFilter(source);
+//    }
 }
