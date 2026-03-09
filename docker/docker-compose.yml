@@ -100,7 +100,7 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    container_name: listing-service-app
+    container_name: estate-listing-service
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
