@@ -12,6 +12,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/amenities")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class AmenityController {
 
     private final AmenityService amenityService;
