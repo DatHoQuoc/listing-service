@@ -22,7 +22,10 @@ public class CorsConfig extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws ServletException, IOException {
-
+        log.warn(">>> HIT: {} {} from {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                request.getHeader("Origin"));
         String origin = request.getHeader("Origin");
         String method = request.getMethod();
         String uri = request.getRequestURI();
@@ -30,11 +33,14 @@ public class CorsConfig extends OncePerRequestFilter {
         // 👇 LOG EVERYTHING
         log.warn(">>> CORS FILTER HIT: method={}, uri={}, origin={}", method, uri, origin);
 
-        response.setHeader("Access-Control-Allow-Origin", origin);
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-        response.setHeader("Access-Control-Allow-Headers", "*");
-        response.setHeader("Access-Control-Max-Age", "3600");
+        if (origin != null) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+            response.setHeader("Access-Control-Allow-Headers",
+                    "*, X-User-Id, Content-Type, Authorization");
+            response.setHeader("Access-Control-Max-Age", "3600");
+        }
 
         if ("OPTIONS".equalsIgnoreCase(method)) {
             log.warn(">>> PREFLIGHT DETECTED - returning 200 for origin={}", origin);

@@ -26,7 +26,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/seller/listings")
 @RequiredArgsConstructor
 @Tag(name = "Seller", description = "API for seller create listing")
-@CrossOrigin("*")
 public class SellerListingController {
     private final ListingService listingService;
 
