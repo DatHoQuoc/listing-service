@@ -22,15 +22,23 @@
 //        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 //        final CorsConfiguration config = new CorsConfiguration();
 //        config.setAllowCredentials(true);
-//        config.setAllowedOrigins(Collections.singletonList(API_BASE));
+//        config.setAllowedOrigins(List.of("https://estate.maik.io.vn",
+//                "http://localhost:5173"));
 //        config.setAllowedOriginPatterns(List.of("*"));
+//        config.setAllowedHeaders(Arrays.asList(
+//                        HttpHeaders.ORIGIN,
+//                        HttpHeaders.CONTENT_TYPE,
+//                        HttpHeaders.ACCEPT,
+//                        HttpHeaders.AUTHORIZATION,
+//                        "x-user-id"
+//                )
+//        );
 //        config.setAllowedMethods(Arrays.asList(
 //                "GET",
 //                "POST",
 //                "PUT",
 //                "DELETE",
-//                "PATCH",
-//                "OPTIONS"
+//                "PATCH"
 //        ));
 //        source.registerCorsConfiguration("/**", config);
 //        return new CorsFilter(source);

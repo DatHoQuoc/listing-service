@@ -3,6 +3,7 @@ package com.dathq.swd302.listingservice.service.impl;
 import com.dathq.swd302.listingservice.dto.request.ApproveListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RejectListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RequestChangesRequest;
+import com.dathq.swd302.listingservice.dto.request.ResolvePostRequest;
 import com.dathq.swd302.listingservice.dto.response.ListingReviewResponse;
 import com.dathq.swd302.listingservice.exception.InvalidListingStateException;
 import com.dathq.swd302.listingservice.exception.ListingNotFoundException;
@@ -13,6 +14,7 @@ import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import com.dathq.swd302.listingservice.model.enums.ReviewAction;
 import com.dathq.swd302.listingservice.repository.ListingRepository;
 import com.dathq.swd302.listingservice.repository.ListingReviewRepository;
+import com.dathq.swd302.listingservice.service.CreditServiceClient;
 import com.dathq.swd302.listingservice.service.ListingReviewService;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ public class ListingReviewServiceImpl implements ListingReviewService {
     private final ListingRepository listingRepository;
     private final ListingReviewMapper listingReviewMapper;
     private final ObjectMapper objectMapper;
+    private final CreditServiceClient creditServiceClient;
 
     @Override
     public ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request) {
@@ -60,6 +64,8 @@ public class ListingReviewServiceImpl implements ListingReviewService {
         if (!listing.isFreePost()) {
             listing.setCreditsCharged(listing.getCreditsLocked());
             listing.setCreditsLocked(0);
+
+            resolveCreditsForApprovedListing(listing);
         }
 
         listingRepository.save(listing);
@@ -192,5 +198,23 @@ public class ListingReviewServiceImpl implements ListingReviewService {
         return listingReviewRepository.findTopByListingIdOrderByReviewedAtDesc(listingId)
                 .map(ListingReview::getReviewId)
                 .orElse(null);
+    }
+
+    private void resolveCreditsForApprovedListing(Listing listing) {
+        try {
+            ResolvePostRequest resolveRequest = new ResolvePostRequest(
+                    listing.getListingId().toString(),
+                    "APPROVE"
+            );
+
+            creditServiceClient.resolvePost(listing.getUserId(), resolveRequest);
+
+            log.info("Credits resolved (charged) for listing: {}, seller: {}",
+                    listing.getListingId(), listing.getUserId());
+
+        } catch (FeignException e) {
+            log.error("Failed to resolve credits for listing: {}. Status: {}, Message: {}",
+                    listing.getListingId(), e.status(), e.getMessage());
+        }
     }
 }
