@@ -97,9 +97,7 @@ services:
 
   # Listing Service Application
   listing-service:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image:  estate-listing-service:latest
     container_name: estate-listing-service
     restart: unless-stopped
     environment:
