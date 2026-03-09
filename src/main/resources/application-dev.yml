@@ -7,5 +7,7 @@ spring:
 
 logging:
   level:
-    com.yourcompany.listing: DEBUG
-    org.springframework.web: DEBUG
+    com.yourcompany.listing: TRACE
+    org.springframework.web: TRACE
+    org.springframework.web.cors: TRACE
+    org.springframework.web.servlet.handler: TRACE
