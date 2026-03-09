@@ -17,7 +17,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/locations")
 @RequiredArgsConstructor
 @Tag(name = "Locations", description = "Public API for location lookups")
-@CrossOrigin("*")
 public class LocationController {
     private final LocationService locationService;
 
