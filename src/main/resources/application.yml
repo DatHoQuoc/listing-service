@@ -35,7 +35,7 @@ spring:
     init:
       mode: embedded
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka.maik.io.vn:9092}
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -59,7 +59,7 @@ spring:
         session.timeout.ms: 30000
     admin:
       properties:
-        bootstrap.servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+        bootstrap.servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka.maik.io.vn:9092}
 
   servlet:
     multipart:
@@ -69,7 +69,7 @@ spring:
 # MinIO Configuration
 minio:
 #  url: ${MINIO_URL:http://localhost:9000}
-  url: ${MINIO_URL:http://localhost:9000}
+  url: ${MINIO_URL:https://minio.maik.io.vn:9001}
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin123}
   bucket-name: listings
