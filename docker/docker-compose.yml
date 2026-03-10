@@ -105,10 +105,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://192.168.1.80:5432/${DB_NAME:-listing_db}
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
-      MINIO_URL: http://minio:9000
+      MINIO_URL: https://api.minio.maik.io.vn
       MINIO_ACCESS_KEY: ${MINIO_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD:-minioadmin123}
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.maik.io.vn:9092
     ports:
       - "3111:8080"
     depends_on:
