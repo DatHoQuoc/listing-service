@@ -19,8 +19,8 @@ public class CorsConfig extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain)
+            HttpServletResponse response,
+            FilterChain chain)
             throws ServletException, IOException {
         log.warn(">>> HIT: {} {} from {}",
                 request.getMethod(),
@@ -38,7 +38,7 @@ public class CorsConfig extends OncePerRequestFilter {
             response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
             response.setHeader("Access-Control-Allow-Headers",
-                    "*, X-User-Id, Content-Type, Authorization");
+                    "*, Content-Type, Authorization");
             response.setHeader("Access-Control-Max-Age", "3600");
         }
 

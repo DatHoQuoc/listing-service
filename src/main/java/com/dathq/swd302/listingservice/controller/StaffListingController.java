@@ -1,7 +1,10 @@
 package com.dathq.swd302.listingservice.controller;
+
 import com.dathq.swd302.listingservice.dto.request.ApproveListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RejectListingRequest;
 import com.dathq.swd302.listingservice.dto.response.ListingReviewResponse;
+import com.dathq.swd302.listingservice.security.JwtClaims;
+import com.dathq.swd302.listingservice.security.JwtUser;
 import com.dathq.swd302.listingservice.service.ListingReviewService;
 import com.dathq.swd302.listingservice.service.ListingService;
 import jakarta.validation.Valid;
@@ -18,23 +21,25 @@ import java.util.UUID;
 public class StaffListingController {
     private final ListingReviewService listingReviewService;
 
-    @PostMapping("/{listingId}/approve")
+    @PutMapping("/{listingId}/approve")
     public ResponseEntity<ListingReviewResponse> approveListing(
-            @RequestHeader("X-User-Id") UUID staffId,
             @PathVariable UUID listingId,
-            @Valid @RequestBody ApproveListingRequest request) {
+            @RequestBody @Valid ApproveListingRequest request,
+            @JwtUser JwtClaims claims,
+            @RequestHeader("Authorization") String authHeader) {
 
-        ListingReviewResponse response = listingReviewService.approveListing(staffId, listingId, request);
+        ListingReviewResponse response = listingReviewService.approveListing(claims.getUserId(), listingId, request,
+                authHeader);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{listingId}/reject")
     public ResponseEntity<ListingReviewResponse> rejectListing(
-            @RequestHeader("X-User-Id") UUID staffId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @Valid @RequestBody RejectListingRequest request) {
 
-        ListingReviewResponse response = listingReviewService.rejectListing(staffId, listingId, request);
+        ListingReviewResponse response = listingReviewService.rejectListing(claims.getUserId(), listingId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -54,9 +59,9 @@ public class StaffListingController {
 
     @GetMapping("/my-reviews")
     public ResponseEntity<List<ListingReviewResponse>> getMyReviews(
-            @RequestHeader("X-User-Id") UUID staffId) {
+            @JwtUser JwtClaims claims) {
 
-        List<ListingReviewResponse> reviews = listingReviewService.getReviewsByStaff(staffId);
+        List<ListingReviewResponse> reviews = listingReviewService.getReviewsByStaff(claims.getUserId());
         return ResponseEntity.ok(reviews);
     }
 }

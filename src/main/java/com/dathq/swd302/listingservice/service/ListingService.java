@@ -36,7 +36,8 @@ public interface ListingService {
      * @return updated listing response
      * @throws //ListingNotFoundException     if listing not found
      * @throws //InvalidListingStateException if listing is not in draft state
-     * @throws // UnauthorizedException        if user doesn't own the listing
+     * @throws //                             UnauthorizedException if user doesn't
+     *                                        own the listing
      */
     ListingResponse updateListing(UUID userId, UUID listingId, UpdateListingRequest request);
 
@@ -47,8 +48,9 @@ public interface ListingService {
      * - Sets submitted_at timestamp
      * - In future: will lock credits via Credit Service
      *
-     * @param userId    the seller's user ID
-     * @param listingId the listing to submit
+     * @param userId     the seller's user ID
+     * @param listingId  the listing to submit
+     * @param authHeader the authorization header for credit service call
      * @return submitted listing response
      * @throws //ListingNotFoundException     if listing not found
      * @throws //InvalidListingStateException if listing not in draft state
@@ -164,5 +166,5 @@ public interface ListingService {
      * @param longitude     longitude coordinate
      */
     void updateListingLocation(UUID userId, UUID listingId, UUID wardId, String streetAddress,
-                               Double latitude, Double longitude);
+            Double latitude, Double longitude);
 }

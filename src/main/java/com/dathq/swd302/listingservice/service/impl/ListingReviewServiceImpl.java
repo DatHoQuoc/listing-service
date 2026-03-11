@@ -45,7 +45,8 @@ public class ListingReviewServiceImpl implements ListingReviewService {
     private final CreditServiceClient creditServiceClient;
 
     @Override
-    public ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request) {
+    public ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request,
+            String authHeader) {
         log.info("Approving listing: {} by staff: {}", listingId, staffId);
 
         Listing listing = listingRepository.findById(listingId)
@@ -65,7 +66,7 @@ public class ListingReviewServiceImpl implements ListingReviewService {
             listing.setCreditsCharged(listing.getCreditsLocked());
             listing.setCreditsLocked(0);
 
-            resolveCreditsForApprovedListing(listing);
+            resolveCreditsForApprovedListing(listing, authHeader);
         }
 
         listingRepository.save(listing);
@@ -200,14 +201,13 @@ public class ListingReviewServiceImpl implements ListingReviewService {
                 .orElse(null);
     }
 
-    private void resolveCreditsForApprovedListing(Listing listing) {
+    private void resolveCreditsForApprovedListing(Listing listing, String authHeader) {
         try {
             ResolvePostRequest resolveRequest = new ResolvePostRequest(
                     listing.getListingId().toString(),
-                    "APPROVE"
-            );
+                    "APPROVE");
 
-            creditServiceClient.resolvePost(listing.getUserId(), resolveRequest);
+            creditServiceClient.resolvePost(authHeader, resolveRequest);
 
             log.info("Credits resolved (charged) for listing: {}, seller: {}",
                     listing.getListingId(), listing.getUserId());

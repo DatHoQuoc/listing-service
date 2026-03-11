@@ -1,8 +1,11 @@
 package com.dathq.swd302.listingservice.controller;
+
 import com.dathq.swd302.listingservice.dto.request.AddTourSceneRequest;
 import com.dathq.swd302.listingservice.dto.request.CreateVirtualTourRequest;
 import com.dathq.swd302.listingservice.dto.response.TourSceneResponse;
 import com.dathq.swd302.listingservice.dto.response.VirtualTourResponse;
+import com.dathq.swd302.listingservice.security.JwtClaims;
+import com.dathq.swd302.listingservice.security.JwtUser;
 import com.dathq.swd302.listingservice.service.VirtualTourService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,27 +29,27 @@ public class VirtualTourController {
     @PostMapping
     public ResponseEntity<VirtualTourResponse> createVirtualTour(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @RequestBody @Valid CreateVirtualTourRequest request) {
 
-        VirtualTourResponse response = virtualTourService.createVirtualTour(userId, listingId, request);
+        VirtualTourResponse response = virtualTourService.createVirtualTour(claims.getUserId(), listingId, request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<VirtualTourResponse> getVirtualTour(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @JwtUser JwtClaims claims) {
 
-        return ResponseEntity.ok(virtualTourService.getVirtualTour(userId, listingId));
+        return ResponseEntity.ok(virtualTourService.getVirtualTour(claims.getUserId(), listingId));
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteVirtualTour(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @JwtUser JwtClaims claims) {
 
-        virtualTourService.deleteVirtualTour(userId, listingId);
+        virtualTourService.deleteVirtualTour(claims.getUserId(), listingId);
         return ResponseEntity.noContent().build();
     }
 
@@ -55,18 +58,18 @@ public class VirtualTourController {
     @PutMapping("/publish")
     public ResponseEntity<Void> publishVirtualTour(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @JwtUser JwtClaims claims) {
 
-        virtualTourService.publishVirtualTour(userId, listingId);
+        virtualTourService.publishVirtualTour(claims.getUserId(), listingId);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/unpublish")
     public ResponseEntity<Void> unpublishVirtualTour(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @JwtUser JwtClaims claims) {
 
-        virtualTourService.unpublishVirtualTour(userId, listingId);
+        virtualTourService.unpublishVirtualTour(claims.getUserId(), listingId);
         return ResponseEntity.ok().build();
     }
 
@@ -75,11 +78,11 @@ public class VirtualTourController {
     @PostMapping(value = "/scenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TourSceneResponse> addTourScene(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") @Valid AddTourSceneRequest request) {
 
-        TourSceneResponse response = virtualTourService.addTourScene(userId, listingId, file, request);
+        TourSceneResponse response = virtualTourService.addTourScene(claims.getUserId(), listingId, file, request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -87,12 +90,15 @@ public class VirtualTourController {
     public ResponseEntity<TourSceneResponse> updateTourScene(
             @PathVariable UUID listingId,
             @PathVariable UUID sceneId,
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @RequestBody @Valid AddTourSceneRequest request) {
 
-        // Note: Updates often don't include the file, so this is a standard JSON Body Put
-        // If you need to update the image too, you'd need a separate endpoint or Multipart PUT
-        TourSceneResponse response = virtualTourService.updateTourScene(userId, listingId, sceneId, request);
+        // Note: Updates often don't include the file, so this is a standard JSON Body
+        // Put
+        // If you need to update the image too, you'd need a separate endpoint or
+        // Multipart PUT
+        TourSceneResponse response = virtualTourService.updateTourScene(claims.getUserId(), listingId, sceneId,
+                request);
         return ResponseEntity.ok(response);
     }
 
@@ -100,19 +106,19 @@ public class VirtualTourController {
     public ResponseEntity<Void> deleteTourScene(
             @PathVariable UUID listingId,
             @PathVariable UUID sceneId,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @JwtUser JwtClaims claims) {
 
-        virtualTourService.deleteTourScene(userId, listingId, sceneId);
+        virtualTourService.deleteTourScene(claims.getUserId(), listingId, sceneId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/scenes/reorder")
     public ResponseEntity<Void> reorderTourScenes(
             @PathVariable UUID listingId,
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @RequestBody List<UUID> orderedSceneIds) {
 
-        virtualTourService.reorderTourScenes(userId, listingId, orderedSceneIds);
+        virtualTourService.reorderTourScenes(claims.getUserId(), listingId, orderedSceneIds);
         return ResponseEntity.ok().build();
     }
 }

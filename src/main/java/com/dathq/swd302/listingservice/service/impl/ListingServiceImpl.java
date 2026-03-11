@@ -54,8 +54,7 @@ public class ListingServiceImpl implements ListingService {
 
         Long userListingCount = listingRepository.countByUserIdAndStatusIn(
                 userId,
-                java.util.List.of(ListingStatus.PUBLISHED, ListingStatus.PENDING_REVIEW)
-        );
+                java.util.List.of(ListingStatus.PUBLISHED, ListingStatus.PENDING_REVIEW));
 
         boolean isFreePost = (userListingCount == 0);
 
@@ -75,12 +74,9 @@ public class ListingServiceImpl implements ListingService {
 
             GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-
             Coordinate coordinate = new Coordinate(request.getLongitude(), request.getLatitude());
 
-
             Point point = geometryFactory.createPoint(coordinate);
-
 
             listing.setGeolocation(point);
         }
@@ -112,12 +108,9 @@ public class ListingServiceImpl implements ListingService {
 
             GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-
             Coordinate coordinate = new Coordinate(request.getLongitude(), request.getLatitude());
 
-
             Point point = geometryFactory.createPoint(coordinate);
-
 
             listing.setGeolocation(point);
         }
@@ -132,7 +125,7 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public ListingResponse submitListing(UUID userId, UUID listingId) {
+    public ListingResponse submitListing(UUID userId, UUID listingId, String authHeader) {
         log.info("Submitting listing: {} by user: {}", listingId, userId);
 
         Listing listing = listingRepository.findById(listingId)
@@ -146,21 +139,21 @@ public class ListingServiceImpl implements ListingService {
             throw new InvalidListingStateException("Only DRAFT listings can be submitted");
         }
 
-//        List<String> validationErrors = listingValidationService.validateForSubmission(listingId);
-//        if (!validationErrors.isEmpty()) {
-//            throw new ListingValidationException("Listing validation failed: " + String.join(", ", validationErrors));
-//        }
+        // List<String> validationErrors =
+        // listingValidationService.validateForSubmission(listingId);
+        // if (!validationErrors.isEmpty()) {
+        // throw new ListingValidationException("Listing validation failed: " +
+        // String.join(", ", validationErrors));
+        // }
 
         // 2. Lock credit via HTTP (sync) — fail fast before saving
         CreditLockResponse creditLock = creditServiceClient.lockCreditForPost(
-                userId,
-                new LockCreditRequest(listingId.toString())
-        );
+                authHeader,
+                new LockCreditRequest(listingId.toString()));
 
         if (!creditLock.success()) {
             throw new InsufficientCreditException(creditLock.message());
         }
-
 
         listing.setStatus(ListingStatus.PENDING_REVIEW);
         listing.setSubmittedAt(OffsetDateTime.now());
@@ -169,10 +162,9 @@ public class ListingServiceImpl implements ListingService {
         listing.setCreditsLocked(creditLock.creditCost()); // 0 or 10
 
         Listing submittedListing = listingRepository.save(listing);
-        aiAnalysisProducerService.sendComprehensiveAnalysisRequest(userId,submittedListing);
+        aiAnalysisProducerService.sendComprehensiveAnalysisRequest(userId, submittedListing);
         log.info("Listing submitted successfully: {}, creditCost: {}, freePost: {}",
                 listingId, creditLock.creditCost(), creditLock.freePost());
-
 
         return listingMapper.toResponse(submittedListing);
     }
@@ -226,13 +218,15 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public org.springframework.data.domain.Page<ListingResponse> getMyListings(UUID userId, org.springframework.data.domain.Pageable pageable) {
+    public org.springframework.data.domain.Page<ListingResponse> getMyListings(UUID userId,
+            org.springframework.data.domain.Pageable pageable) {
         log.info("Fetching paginated listings for user: {}", userId);
 
         Page<Listing> listings = listingRepository.findByUserId(userId, pageable);
         return listings.map(listing -> {
             ListingResponse response = listingMapper.toResponse(listing);
-            List<String> imageUrls = imageService.getListingImages(listing.getListingId()).stream().map(img -> img.getUrl()).collect(Collectors.toList());
+            List<String> imageUrls = imageService.getListingImages(listing.getListingId()).stream()
+                    .map(img -> img.getUrl()).collect(Collectors.toList());
             if (!imageUrls.isEmpty()) {
                 response.setFeaturedImageUrl(imageUrls.get(0));
             }
@@ -298,8 +292,7 @@ public class ListingServiceImpl implements ListingService {
     public boolean hasFreeListing(UUID userId) {
         Long publishedCount = listingRepository.countByUserIdAndStatusIn(
                 userId,
-                java.util.List.of(ListingStatus.PUBLISHED, ListingStatus.PENDING_REVIEW)
-        );
+                java.util.List.of(ListingStatus.PUBLISHED, ListingStatus.PENDING_REVIEW));
         return publishedCount == 0;
     }
 
@@ -336,7 +329,8 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public void updateListingLocation(UUID userId, UUID listingId, UUID wardId, String streetAddress, Double latitude, Double longitude) {
+    public void updateListingLocation(UUID userId, UUID listingId, UUID wardId, String streetAddress, Double latitude,
+            Double longitude) {
         log.info("Updating location for listing: {}", listingId);
 
         Listing listing = listingRepository.findById(listingId)

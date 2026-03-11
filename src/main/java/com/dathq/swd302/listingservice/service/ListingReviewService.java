@@ -1,4 +1,5 @@
 package com.dathq.swd302.listingservice.service;
+
 import com.dathq.swd302.listingservice.dto.request.ApproveListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RejectListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RequestChangesRequest;
@@ -6,8 +7,10 @@ import com.dathq.swd302.listingservice.dto.response.ListingReviewResponse;
 
 import java.util.List;
 import java.util.UUID;
+
 public interface ListingReviewService {
-    ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request);
+    ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request,
+            String authHeader);
 
     ListingReviewResponse rejectListing(UUID staffId, UUID listingId, RejectListingRequest request);
 

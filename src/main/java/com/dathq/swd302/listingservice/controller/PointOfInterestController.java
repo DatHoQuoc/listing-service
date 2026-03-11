@@ -1,6 +1,9 @@
 package com.dathq.swd302.listingservice.controller;
+
 import com.dathq.swd302.listingservice.dto.request.CreatePOIRequest;
 import com.dathq.swd302.listingservice.dto.response.POIResponse;
+import com.dathq.swd302.listingservice.security.JwtClaims;
+import com.dathq.swd302.listingservice.security.JwtUser;
 import com.dathq.swd302.listingservice.service.PointOfInterestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +22,19 @@ public class PointOfInterestController {
 
     @PostMapping
     public ResponseEntity<POIResponse> addPointOfInterest(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @Valid @RequestBody CreatePOIRequest request) {
-        POIResponse response = poiService.addPointOfInterest(userId, listingId, request);
+        POIResponse response = poiService.addPointOfInterest(claims.getUserId(), listingId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/batch")
     public ResponseEntity<List<POIResponse>> addPointsOfInterest(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @Valid @RequestBody List<CreatePOIRequest> requests) {
-        List<POIResponse> responses = poiService.addPointsOfInterest(userId, listingId, requests);
+        List<POIResponse> responses = poiService.addPointsOfInterest(claims.getUserId(), listingId, requests);
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
@@ -51,28 +54,28 @@ public class PointOfInterestController {
 
     @PutMapping("/{poiId}")
     public ResponseEntity<POIResponse> updatePointOfInterest(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @PathVariable UUID poiId,
             @Valid @RequestBody CreatePOIRequest request) {
-        POIResponse response = poiService.updatePointOfInterest(userId, listingId, poiId, request);
+        POIResponse response = poiService.updatePointOfInterest(claims.getUserId(), listingId, poiId, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{poiId}")
     public ResponseEntity<Void> deletePointOfInterest(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @PathVariable UUID poiId) {
-        poiService.deletePointOfInterest(userId, listingId, poiId);
+        poiService.deletePointOfInterest(claims.getUserId(), listingId, poiId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteAllPOIs(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID listingId) {
-        poiService.deleteAllPOIs(userId, listingId);
+        poiService.deleteAllPOIs(claims.getUserId(), listingId);
         return ResponseEntity.noContent().build();
     }
 }

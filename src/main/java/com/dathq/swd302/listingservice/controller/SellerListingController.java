@@ -1,12 +1,17 @@
 package com.dathq.swd302.listingservice.controller;
 
-
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
+import com.dathq.swd302.listingservice.dto.request.listing.UpdateListingAmenitiesRequest;
+import com.dathq.swd302.listingservice.dto.request.listing.UpdateListingLocationRequest;
 import com.dathq.swd302.listingservice.dto.response.ListingDetailResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingResponse;
+import com.dathq.swd302.listingservice.dto.response.SellerListingListResponse;
 import com.dathq.swd302.listingservice.model.enums.ListingStatus;
+import com.dathq.swd302.listingservice.security.JwtClaims;
+import com.dathq.swd302.listingservice.security.JwtUser;
 import com.dathq.swd302.listingservice.service.ListingService;
+import com.dathq.swd302.listingservice.service.SellerListingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,94 +33,93 @@ import java.util.UUID;
 @Tag(name = "Seller", description = "API for seller create listing")
 public class SellerListingController {
     private final ListingService listingService;
+    private final SellerListingService sellerListingService;
 
     // --- 1. Create & Update Drafts ---
 
-    @PostMapping
+    @PostMapping("/draft")
     @Operation(summary = "Create draft", description = "")
-    public ResponseEntity<ListingResponse> createDraftListing(
-            @RequestHeader("X-User-Id") UUID userId,
+    public ResponseEntity<SellerListingListResponse> createDraftListing(
+            @JwtUser JwtClaims claims,
             @Valid @RequestBody CreateListingRequest request) {
 
-        ListingResponse response = listingService.createDraft(userId, request);
+        SellerListingListResponse response = sellerListingService.createDraftListing(claims.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ListingResponse> updateListingDetails(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID id,
             @Valid @RequestBody UpdateListingRequest request) { // Fixed: Object -> UpdateListingRequest
 
-        return ResponseEntity.ok(listingService.updateListing(userId, id, request));
+        return ResponseEntity.ok(listingService.updateListing(claims.getUserId(), id, request));
     }
 
     // --- 2. Retrieve Listings ---
 
     @GetMapping
     public ResponseEntity<Page<ListingResponse>> getMyListings(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return ResponseEntity.ok(listingService.getMyListings(userId, pageable));
+        return ResponseEntity.ok(listingService.getMyListings(claims.getUserId(), pageable));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<ListingResponse>> getMyListingsByStatus(
-            @RequestHeader("X-User-Id") UUID userId,
+    public ResponseEntity<List<SellerListingListResponse>> getMyListingsByStatus(
+            @JwtUser JwtClaims claims,
             @PathVariable ListingStatus status) {
 
-        return ResponseEntity.ok(listingService.getMyListingsByStatus(userId, status));
+        return ResponseEntity.ok(sellerListingService.getMyListingsByStatus(claims.getUserId(), status));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ListingDetailResponse> getListingDetails(
-            @RequestHeader("X-User-Id") UUID userId,
-            @PathVariable UUID id) {
+    public ResponseEntity<SellerListingListResponse> getListingDetails(
+            @PathVariable UUID id,
+            @JwtUser JwtClaims claims) {
 
-        return ResponseEntity.ok(listingService.getListingById(userId, id));
+        return ResponseEntity.ok(sellerListingService.getListingDetails(id, claims.getUserId()));
     }
 
     // --- 3. Submission Workflow ---
 
     @PutMapping("/{id}/submit") // Changed to PUT as it updates status
     public ResponseEntity<ListingResponse> submitForReview(
-            @RequestHeader("X-User-Id") UUID userId,
-            @PathVariable UUID id) {
+            @JwtUser JwtClaims claims,
+            @PathVariable UUID id,
+            @RequestHeader("Authorization") String authHeader) {
 
-        return ResponseEntity.ok(listingService.submitListing(userId, id));
+        return ResponseEntity.ok(listingService.submitListing(claims.getUserId(), id, authHeader));
     }
 
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ListingResponse> cancelSubmission(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID id) {
 
-        return ResponseEntity.ok(listingService.cancelSubmission(userId, id));
+        return ResponseEntity.ok(listingService.cancelSubmission(claims.getUserId(), id));
     }
 
     // --- 4. Sub-resource Updates (Amenities & Location) ---
 
     @PutMapping("/{id}/amenities")
     public ResponseEntity<Void> updateListingAmenities(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID id,
-            @RequestBody List<UUID> amenityIds) {
+            @RequestBody UpdateListingAmenitiesRequest request) {
 
-        listingService.updateListingAmenities(userId, id, amenityIds);
+        listingService.updateListingAmenities(claims.getUserId(), id, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/location")
     public ResponseEntity<Void> updateListingLocation(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID id,
-            @RequestParam(required = false) UUID wardId,
-            @RequestParam(required = false) String streetAddress,
-            @RequestParam(required = false) Double latitude,
-            @RequestParam(required = false) Double longitude) {
+            @RequestBody UpdateListingLocationRequest request) {
 
-        listingService.updateListingLocation(userId, id, wardId, streetAddress, latitude, longitude);
+        listingService.updateListingLocation(claims.getUserId(), id, request);
         return ResponseEntity.ok().build();
     }
 
@@ -123,10 +127,10 @@ public class SellerListingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDraft(
-            @RequestHeader("X-User-Id") UUID userId,
+            @JwtUser JwtClaims claims,
             @PathVariable UUID id) {
 
-        listingService.deleteListing(userId, id);
+        listingService.deleteListing(claims.getUserId(), id);
         return ResponseEntity.noContent().build();
     }
 }
