@@ -69,7 +69,7 @@ spring:
 # MinIO Configuration
 minio:
 #  url: ${MINIO_URL:http://localhost:9000}
-  url: ${MINIO_URL:https://minio.maik.io.vn:9001}
+  url: ${MINIO_URL:http://localhost:9000}
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin123}
   bucket-name: listings

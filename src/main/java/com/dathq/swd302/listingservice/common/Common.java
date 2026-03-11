@@ -27,4 +27,6 @@ public class Common {
         }
         return "listings/" + listingId + "/" + UUID.randomUUID() + extension;
     }
+
+
 }

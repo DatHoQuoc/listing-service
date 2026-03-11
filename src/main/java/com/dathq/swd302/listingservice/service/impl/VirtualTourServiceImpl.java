@@ -1,4 +1,5 @@
 package com.dathq.swd302.listingservice.service.impl;
+import com.dathq.swd302.listingservice.common.Common;
 import com.dathq.swd302.listingservice.dto.request.AddTourSceneRequest;
 import com.dathq.swd302.listingservice.dto.request.CreateVirtualTourRequest;
 import com.dathq.swd302.listingservice.dto.response.TourSceneResponse;
@@ -42,7 +43,6 @@ public class VirtualTourServiceImpl implements VirtualTourService {
     private final ListingRepository listingRepository;
     private final MinIOStorageService minIOStorageService;
     private final VirtualTourMapper virtualTourMapper;
-
     @Override
     public VirtualTourResponse createVirtualTour(UUID userId, UUID listingId, CreateVirtualTourRequest request) {
         log.info("Creating virtual tour for listing: {}", listingId);
@@ -359,5 +359,6 @@ public class VirtualTourServiceImpl implements VirtualTourService {
             throw new RuntimeException("Failed to serialize hotspots", e);
         }
     }
+
 
 }

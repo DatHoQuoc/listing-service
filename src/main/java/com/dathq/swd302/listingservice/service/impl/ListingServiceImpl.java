@@ -1,5 +1,6 @@
 package com.dathq.swd302.listingservice.service.impl;
 
+import com.dathq.swd302.listingservice.common.Common;
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
 import com.dathq.swd302.listingservice.dto.request.LockCreditRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
@@ -15,6 +16,7 @@ import com.dathq.swd302.listingservice.model.Ward;
 import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import com.dathq.swd302.listingservice.repository.AmenityRepository;
 import com.dathq.swd302.listingservice.repository.ListingRepository;
+import com.dathq.swd302.listingservice.repository.VirtualTourRepository;
 import com.dathq.swd302.listingservice.repository.WardRepository;
 import com.dathq.swd302.listingservice.service.*;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +49,7 @@ public class ListingServiceImpl implements ListingService {
     private final MinIOStorageService minIOStorageService;
     private final AIAnalysisProducerService aiAnalysisProducerService;
     private final CreditServiceClient creditServiceClient;
-
+    private final VirtualTourRepository virtualTourRepository;
     @Override
     public ListingResponse createDraft(UUID userId, CreateListingRequest request) {
         log.info("Creating draft listing for user: {}", userId);
@@ -145,16 +147,17 @@ public class ListingServiceImpl implements ListingService {
         // throw new ListingValidationException("Listing validation failed: " +
         // String.join(", ", validationErrors));
         // }
-
+        int listingType = virtualTourRepository
+                .findByListing_ListingId(listingId)
+                .isPresent() ? 2 : 1;
         // 2. Lock credit via HTTP (sync) — fail fast before saving
         CreditLockResponse creditLock = creditServiceClient.lockCreditForPost(
                 authHeader,
-                new LockCreditRequest(listingId.toString()));
+                new LockCreditRequest(listingId.toString(), listingType));
 
         if (!creditLock.success()) {
             throw new InsufficientCreditException(creditLock.message());
         }
-
         listing.setStatus(ListingStatus.PENDING_REVIEW);
         listing.setSubmittedAt(OffsetDateTime.now());
         listing.setUpdatedAt(OffsetDateTime.now());
