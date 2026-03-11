@@ -226,6 +226,13 @@ public class ListingServiceImpl implements ListingService {
         log.info("Fetching paginated listings for user: {}", userId);
 
         Page<Listing> listings = listingRepository.findByUserId(userId, pageable);
+
+        if (listings.isEmpty()) {
+            log.info("No listings found for user: {}", userId);
+            return Page.empty(pageable);
+        }
+
+
         return listings.map(listing -> {
             ListingResponse response = listingMapper.toResponse(listing);
             List<String> imageUrls = imageService.getListingImages(listing.getListingId()).stream()
