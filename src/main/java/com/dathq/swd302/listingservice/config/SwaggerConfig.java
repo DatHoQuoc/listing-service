@@ -31,11 +31,11 @@ import io.swagger.v3.oas.models.info.Info;
         servers = {
                 @Server(
                         description = "Local ENV",
-                        url = "http://localhost:8088/api/v1"
+                        url = "http://localhost:8080/api/v1"
                 ),
                 @Server(
                         description = "PROD ENV",
-                        url = "https://ferticare.herokuapp.com/api/v1"
+                        url = "https://api.estate.maik.io.vn/listing"
                 )
         },
         security =  {
