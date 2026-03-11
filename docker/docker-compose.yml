@@ -108,6 +108,7 @@ services:
       MINIO_URL: https://api.minio.maik.io.vn
       MINIO_ACCESS_KEY: ${MINIO_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD:-minioadmin123}
+      CREDIT_URL: "${CREDIT_URL:-http://credit-service:8080}"
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.maik.io.vn:9092
     ports:
       - "3111:8080"
