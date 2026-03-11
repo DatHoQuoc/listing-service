@@ -3,9 +3,8 @@ package com.dathq.swd302.listingservice.controller;
 import java.util.List;
 import java.util.UUID;
 
-import com.dathq.swd302.listingservice.dto.request.UpdateDocumentNameRequest;
+import com.dathq.swd302.listingservice.dto.request.UploadDocumentRequest;
 import com.dathq.swd302.listingservice.dto.response.DocumentResponse;
-import com.dathq.swd302.listingservice.dto.response.DocumentUploadResponse;
 import com.dathq.swd302.listingservice.model.enums.DocumentType;
 import com.dathq.swd302.listingservice.security.JwtClaims;
 import com.dathq.swd302.listingservice.security.JwtUser;
@@ -26,25 +25,25 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<DocumentUploadResponse> uploadDocument(
+    public ResponseEntity<DocumentResponse> uploadDocument(
             @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("type") String type) {
+            @RequestBody UploadDocumentRequest uploadDocumentRequest) {
 
-        DocumentUploadResponse response = documentService.uploadDocument(claims.getUserId(), listingId, file, type);
+        DocumentResponse response = documentService.uploadDocument(claims.getUserId(), listingId, file, uploadDocumentRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<DocumentUploadResponse>> uploadDocuments(
+    public ResponseEntity<List<DocumentResponse>> uploadDocuments(
             @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @RequestParam("files") List<MultipartFile> files,
-            @RequestParam("type") String type) {
+            @RequestBody List<UploadDocumentRequest> uploadDocumentRequests) {
 
-        List<DocumentUploadResponse> response = documentService.uploadDocuments(claims.getUserId(), listingId, files,
-                type);
+        List<DocumentResponse> response = documentService.uploadDocuments(claims.getUserId(), listingId, files,
+                uploadDocumentRequests);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -70,9 +69,9 @@ public class DocumentController {
     public ResponseEntity<Void> deleteDocument(
             @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
-            @RequestParam("documentUrl") String documentUrl) {
+            @PathVariable("documentId") UUID documentId) {
 
-        documentService.deleteDocument(claims.getUserId(), listingId, documentUrl);
+        documentService.deleteDocument(claims.getUserId(), listingId, documentId);
         return ResponseEntity.noContent().build();
     }
 

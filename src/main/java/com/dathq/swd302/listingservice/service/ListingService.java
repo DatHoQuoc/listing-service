@@ -56,7 +56,7 @@ public interface ListingService {
      * @throws //InvalidListingStateException if listing not in draft state
      * @throws //ListingValidationException   if listing is incomplete
      */
-    ListingResponse submitListing(UUID userId, UUID listingId);
+    ListingResponse submitListing(UUID userId, UUID listingId, String authHeader);
 
     /**
      * Cancel a pending listing submission

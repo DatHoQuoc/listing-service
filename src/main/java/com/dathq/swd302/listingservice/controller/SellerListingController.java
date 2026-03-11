@@ -1,17 +1,14 @@
 package com.dathq.swd302.listingservice.controller;
 
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
+import com.dathq.swd302.listingservice.dto.request.UpdateListingLocationRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
-import com.dathq.swd302.listingservice.dto.request.listing.UpdateListingAmenitiesRequest;
-import com.dathq.swd302.listingservice.dto.request.listing.UpdateListingLocationRequest;
 import com.dathq.swd302.listingservice.dto.response.ListingDetailResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingResponse;
-import com.dathq.swd302.listingservice.dto.response.SellerListingListResponse;
 import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import com.dathq.swd302.listingservice.security.JwtClaims;
 import com.dathq.swd302.listingservice.security.JwtUser;
 import com.dathq.swd302.listingservice.service.ListingService;
-import com.dathq.swd302.listingservice.service.SellerListingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,17 +30,17 @@ import java.util.UUID;
 @Tag(name = "Seller", description = "API for seller create listing")
 public class SellerListingController {
     private final ListingService listingService;
-    private final SellerListingService sellerListingService;
+    private final ListingService sellerListingService;
 
     // --- 1. Create & Update Drafts ---
 
     @PostMapping("/draft")
     @Operation(summary = "Create draft", description = "")
-    public ResponseEntity<SellerListingListResponse> createDraftListing(
+    public ResponseEntity<ListingResponse> createDraftListing(
             @JwtUser JwtClaims claims,
             @Valid @RequestBody CreateListingRequest request) {
 
-        SellerListingListResponse response = sellerListingService.createDraftListing(claims.getUserId(), request);
+        ListingResponse response = sellerListingService.createDraft(claims.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -67,7 +64,7 @@ public class SellerListingController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<SellerListingListResponse>> getMyListingsByStatus(
+    public ResponseEntity<List<ListingResponse>> getMyListingsByStatus(
             @JwtUser JwtClaims claims,
             @PathVariable ListingStatus status) {
 
@@ -75,11 +72,11 @@ public class SellerListingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SellerListingListResponse> getListingDetails(
+    public ResponseEntity<ListingDetailResponse> getListingDetails(
             @PathVariable UUID id,
             @JwtUser JwtClaims claims) {
 
-        return ResponseEntity.ok(sellerListingService.getListingDetails(id, claims.getUserId()));
+        return ResponseEntity.ok(sellerListingService.getListingById(id, claims.getUserId()));
     }
 
     // --- 3. Submission Workflow ---
@@ -107,7 +104,7 @@ public class SellerListingController {
     public ResponseEntity<Void> updateListingAmenities(
             @JwtUser JwtClaims claims,
             @PathVariable UUID id,
-            @RequestBody UpdateListingAmenitiesRequest request) {
+            @RequestBody List<UUID>  request) {
 
         listingService.updateListingAmenities(claims.getUserId(), id, request);
         return ResponseEntity.ok().build();
@@ -119,7 +116,14 @@ public class SellerListingController {
             @PathVariable UUID id,
             @RequestBody UpdateListingLocationRequest request) {
 
-        listingService.updateListingLocation(claims.getUserId(), id, request);
+        listingService.updateListingLocation(
+                claims.getUserId(),
+                id,
+                request.getWardId(),
+                request.getStreetAddress(),
+                request.getLatitude(),
+                request.getLongitude()
+        );
         return ResponseEntity.ok().build();
     }
 
