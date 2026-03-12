@@ -1,6 +1,7 @@
 package com.dathq.swd302.listingservice.config;
 import com.dathq.swd302.listingservice.dto.AIAnalysisEventDto;
 import com.dathq.swd302.listingservice.dto.ListingEventDto;
+import com.dathq.swd302.listingservice.model.Listing;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -119,6 +120,20 @@ public class KafkaConfig {
     @Bean
     public KafkaTemplate<String, ListingEventDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    public KafkaTemplate<String, Listing> listingKafkaTemplate() {
+        return new KafkaTemplate<>(listingProducerFactory());
+    }
+
+    @Bean
+    public ProducerFactory<String, Listing> listingProducerFactory() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class); // <-- Jackson JSON
+        return new DefaultKafkaProducerFactory<>(config);
     }
 
     @Bean
