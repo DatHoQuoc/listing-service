@@ -1,5 +1,8 @@
 package com.dathq.swd302.listingservice.controller;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,6 +12,10 @@ import com.dathq.swd302.listingservice.model.enums.DocumentType;
 import com.dathq.swd302.listingservice.security.JwtClaims;
 import com.dathq.swd302.listingservice.security.JwtUser;
 import com.dathq.swd302.listingservice.service.DocumentService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,11 +46,32 @@ public class DocumentController {
     public ResponseEntity<List<DocumentResponse>> uploadDocuments(
             @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
-            @RequestParam("files") List<MultipartFile> files,
-            @RequestBody List<UploadDocumentRequest> uploadDocumentRequests) {
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestPart("uploadDocumentRequests") List<MultipartFile> uploadDocumentRequests
+    ) {
+        // Get bytes from the file
 
-        List<DocumentResponse> response = documentService.uploadDocuments(claims.getUserId(), listingId, files,
-                uploadDocumentRequests);
+        // Convert bytes to a String using a specific charset (e.g., UTF-8)
+
+        var requests = uploadDocumentRequests.stream().map(uploadDocumentRequest -> {
+            byte[] bytes = null;
+            try {
+                bytes = uploadDocumentRequest.getBytes();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String content = new String(bytes, StandardCharsets.UTF_8);
+            var mapper = new ObjectMapper();
+            UploadDocumentRequest req= null;
+            try {
+                req = mapper.readValue(content, UploadDocumentRequest.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            return req;
+        }).toList();
+        var response = documentService.uploadDocuments(claims.getUserId(), listingId, files, requests);
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

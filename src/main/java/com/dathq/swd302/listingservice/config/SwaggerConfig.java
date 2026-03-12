@@ -31,7 +31,7 @@ import io.swagger.v3.oas.models.info.Info;
         servers = {
                 @Server(
                         description = "Local ENV",
-                        url = "http://localhost:8080/api/v1"
+                        url = "http://localhost:8080"
                 ),
                 @Server(
                         description = "PROD ENV",

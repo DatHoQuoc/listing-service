@@ -254,7 +254,7 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     @Transactional(readOnly = true)
-    public ListingDetailResponse getListingById(UUID userId, UUID listingId) {
+    public ListingDetailResponse getListingById(UUID listingId, UUID userId) {
         log.info("Fetching listing details: {} for user: {}", listingId, userId);
 
         Listing listing = listingRepository.findByListingIdAndUserId(listingId, userId)
