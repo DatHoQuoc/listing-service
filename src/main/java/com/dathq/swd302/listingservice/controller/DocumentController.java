@@ -47,30 +47,30 @@ public class DocumentController {
             @JwtUser JwtClaims claims,
             @PathVariable UUID listingId,
             @RequestPart("files") List<MultipartFile> files,
-            @RequestPart("uploadDocumentRequests") List<MultipartFile> uploadDocumentRequests
+            @RequestPart("data") List<UploadDocumentRequest> uploadDocumentRequests
     ) {
         // Get bytes from the file
 
         // Convert bytes to a String using a specific charset (e.g., UTF-8)
 
-        var requests = uploadDocumentRequests.stream().map(uploadDocumentRequest -> {
-            byte[] bytes = null;
-            try {
-                bytes = uploadDocumentRequest.getBytes();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            String content = new String(bytes, StandardCharsets.UTF_8);
-            var mapper = new ObjectMapper();
-            UploadDocumentRequest req= null;
-            try {
-                req = mapper.readValue(content, UploadDocumentRequest.class);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            return req;
-        }).toList();
-        var response = documentService.uploadDocuments(claims.getUserId(), listingId, files, requests);
+        // var requests = uploadDocumentRequests.stream().map(uploadDocumentRequest -> {
+        //     byte[] bytes = null;
+        //     try {
+        //         bytes = uploadDocumentRequest.getBytes();
+        //     } catch (IOException e) {
+        //         throw new RuntimeException(e);
+        //     }
+        //     String content = new String(bytes, StandardCharsets.UTF_8);
+        //     var mapper = new ObjectMapper();
+        //     UploadDocumentRequest req= null;
+        //     try {
+        //         req = mapper.readValue(content, UploadDocumentRequest.class);
+        //     } catch (JsonProcessingException e) {
+        //         throw new RuntimeException(e);
+        //     }
+        //     return req;
+        // }).toList();
+        var response = documentService.uploadDocuments(claims.getUserId(), listingId, files, uploadDocumentRequests);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
