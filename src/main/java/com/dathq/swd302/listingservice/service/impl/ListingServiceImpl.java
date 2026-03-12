@@ -257,13 +257,11 @@ public class ListingServiceImpl implements ListingService {
     public ListingDetailResponse getListingById(UUID userId, UUID listingId) {
         log.info("Fetching listing details: {} for user: {}", listingId, userId);
 
-        Listing listing = listingRepository.findById(listingId)
+        Listing listing = listingRepository.findByListingIdAndUserId(listingId, userId)
                 .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
+        boolean exists = listingRepository.existsById(listingId);
 
-        if (!listing.getUserId().equals(userId)) {
-            throw new UnauthorizedException("User does not own this listing");
-        }
-
+        log.info("Listing exists: {}", exists);
         ListingDetailResponse response = listingMapper.toDetailResponse(listing);
 
         Integer imageCount = imageService.countListingImages(listingId);
