@@ -26,7 +26,6 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

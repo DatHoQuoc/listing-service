@@ -1,6 +1,8 @@
 package com.dathq.swd302.listingservice.service.impl;
 
 import com.dathq.swd302.listingservice.config.KafkaConfig;
+import com.dathq.swd302.listingservice.dto.ListingKafkaEvent;
+import com.dathq.swd302.listingservice.mapper.ListingEventMapper;
 import com.dathq.swd302.listingservice.model.Listing;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,11 +14,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class ListingUpdatedProducerService {
-    private final KafkaTemplate<String, Listing> kafkaTemplate;
+    private final KafkaTemplate<String, ListingKafkaEvent> kafkaTemplate;
 
     public void sendListingUpdated(Listing listing) {
 
-        kafkaTemplate.send(KafkaConfig.LISTING_PUBLISH_TOPIC, listing.getListingId().toString(), listing)
+        ListingKafkaEvent event = ListingEventMapper.toKafkaEvent(listing);
+
+        kafkaTemplate.send(KafkaConfig.LISTING_PUBLISH_TOPIC, listing.getListingId().toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Failed to publish ListingUpdatedEvent for listingId: {}",
