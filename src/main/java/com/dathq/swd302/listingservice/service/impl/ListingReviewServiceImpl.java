@@ -4,9 +4,11 @@ import com.dathq.swd302.listingservice.dto.request.ApproveListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RejectListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RequestChangesRequest;
 import com.dathq.swd302.listingservice.dto.request.ResolvePostRequest;
+import com.dathq.swd302.listingservice.dto.response.ListingResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingReviewResponse;
 import com.dathq.swd302.listingservice.exception.InvalidListingStateException;
 import com.dathq.swd302.listingservice.exception.ListingNotFoundException;
+import com.dathq.swd302.listingservice.mapper.ListingMapper;
 import com.dathq.swd302.listingservice.mapper.ListingReviewMapper;
 import com.dathq.swd302.listingservice.model.Listing;
 import com.dathq.swd302.listingservice.model.ListingReview;
@@ -15,6 +17,7 @@ import com.dathq.swd302.listingservice.model.enums.ReviewAction;
 import com.dathq.swd302.listingservice.repository.ListingRepository;
 import com.dathq.swd302.listingservice.repository.ListingReviewRepository;
 import com.dathq.swd302.listingservice.service.CreditServiceClient;
+import com.dathq.swd302.listingservice.service.ImageService;
 import com.dathq.swd302.listingservice.service.ListingReviewService;
 
 import java.util.List;
@@ -25,12 +28,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,7 +49,8 @@ public class ListingReviewServiceImpl implements ListingReviewService {
     private final ListingReviewMapper listingReviewMapper;
     private final ObjectMapper objectMapper;
     private final CreditServiceClient creditServiceClient;
-
+    private final ListingMapper listingMapper;
+    private final ImageService imageService;
     @Override
     public ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request,
             String authHeader) {
@@ -188,6 +195,28 @@ public class ListingReviewServiceImpl implements ListingReviewService {
         return listingReviewRepository.findTopByListingIdOrderByReviewVersionDesc(listingId)
                 .map(ListingReview::getReviewVersion)
                 .orElse(0);
+    }
+
+    @Override
+    public Page<ListingResponse> getPendingListings(Pageable pageable) {
+        log.info("Fetching paginated pending listings for staff review");
+
+        Page<Listing> listings = listingRepository.findByStatus(ListingStatus.PENDING_REVIEW, pageable);
+
+        if (listings.isEmpty()) {
+            log.info("No pending listings found");
+            return Page.empty(pageable);
+        }
+
+        return listings.map(listing -> {
+            ListingResponse response = listingMapper.toResponse(listing);
+            List<String> imageUrls = imageService.getListingImages(listing.getListingId()).stream()
+                    .map(img -> img.getUrl()).collect(Collectors.toList());
+            if (!imageUrls.isEmpty()) {
+                response.setFeaturedImageUrl(imageUrls.get(0));
+            }
+            return response;
+        });
     }
 
     private Integer getNextReviewVersion(UUID listingId) {

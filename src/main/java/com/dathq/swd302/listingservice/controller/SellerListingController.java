@@ -110,7 +110,7 @@ public class SellerListingController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/location")
+    @PatchMapping("/{id}/location")
     public ResponseEntity<Void> updateListingLocation(
             @JwtUser JwtClaims claims,
             @PathVariable UUID id,

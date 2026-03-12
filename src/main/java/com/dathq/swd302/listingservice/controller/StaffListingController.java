@@ -2,6 +2,7 @@ package com.dathq.swd302.listingservice.controller;
 
 import com.dathq.swd302.listingservice.dto.request.ApproveListingRequest;
 import com.dathq.swd302.listingservice.dto.request.RejectListingRequest;
+import com.dathq.swd302.listingservice.dto.response.ListingResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingReviewResponse;
 import com.dathq.swd302.listingservice.security.JwtClaims;
 import com.dathq.swd302.listingservice.security.JwtUser;
@@ -9,6 +10,10 @@ import com.dathq.swd302.listingservice.service.ListingReviewService;
 import com.dathq.swd302.listingservice.service.ListingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +25,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StaffListingController {
     private final ListingReviewService listingReviewService;
+
+
+    @GetMapping("/pending")
+    public ResponseEntity<Page<ListingResponse>> getPendingListings(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return ResponseEntity.ok(listingReviewService.getPendingListings(pageable));
+    }
 
     @PutMapping("/{listingId}/approve")
     public ResponseEntity<ListingReviewResponse> approveListing(
