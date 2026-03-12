@@ -29,6 +29,8 @@ public class KafkaConfig {
     public static final String AI_ANALYSIS_REQUEST_TOPIC = "new_listing";
     public static final String AI_ANALYSIS_RESPONSE_TOPIC = "ai-analysis-response";
 
+    public static final String LISTING_PUBLISH_TOPIC = "listing-publish";
+
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -39,13 +41,15 @@ public class KafkaConfig {
      * Replicas: 1 (increase in production with multiple brokers)
      */
     @Bean
-    public NewTopic listingCreatedTopic() {
-        return TopicBuilder.name(LISTING_CREATED_TOPIC)
+    public NewTopic listingPublishedTopic() {
+        return TopicBuilder.name(LISTING_PUBLISH_TOPIC)
                 .partitions(3)
                 .replicas(1)
                 .compact()
                 .build();
     }
+
+
 
     /**
      * Create listing-updated topic
