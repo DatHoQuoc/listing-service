@@ -4,6 +4,7 @@ package com.dathq.swd302.listingservice.model;
 import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import com.dathq.swd302.listingservice.model.enums.ListingType;
 import com.dathq.swd302.listingservice.model.enums.PropertyType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.persistence.*;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
