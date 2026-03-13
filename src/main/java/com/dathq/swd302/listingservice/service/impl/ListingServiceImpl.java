@@ -50,7 +50,6 @@ public class ListingServiceImpl implements ListingService {
     private final AIAnalysisProducerService aiAnalysisProducerService;
     private final CreditServiceClient creditServiceClient;
     private final VirtualTourRepository virtualTourRepository;
-    private final ListingUpdatedProducerService listingUpdatedProducerService;
     @Override
     public ListingResponse createDraft(UUID userId, CreateListingRequest request) {
         log.info("Creating draft listing for user: {}", userId);
@@ -167,7 +166,6 @@ public class ListingServiceImpl implements ListingService {
 
         Listing submittedListing = listingRepository.save(listing);
         aiAnalysisProducerService.sendComprehensiveAnalysisRequest(userId, submittedListing);
-        listingUpdatedProducerService.sendListingUpdated(submittedListing);
         log.info("Listing submitted successfully: {}, creditCost: {}, freePost: {}",
                 listingId, creditLock.creditCost(), creditLock.freePost());
 

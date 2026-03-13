@@ -51,6 +51,8 @@ public class ListingReviewServiceImpl implements ListingReviewService {
     private final CreditServiceClient creditServiceClient;
     private final ListingMapper listingMapper;
     private final ImageService imageService;
+    private final ListingUpdatedProducerService listingUpdatedProducerService;
+
     @Override
     public ListingReviewResponse approveListing(UUID staffId, UUID listingId, ApproveListingRequest request,
             String authHeader) {
@@ -104,6 +106,7 @@ public class ListingReviewServiceImpl implements ListingReviewService {
         }
 
         ListingReview savedReview = listingReviewRepository.save(review);
+        listingUpdatedProducerService.sendListingUpdated(listing);
 
         log.info("Listing approved: {}, review ID: {}", listingId, savedReview.getReviewId());
 
