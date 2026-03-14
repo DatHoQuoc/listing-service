@@ -5,6 +5,7 @@ import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -40,5 +41,9 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
     Page<Listing> findByStatus(ListingStatus listingStatus, Pageable pageable);
 
     Optional<Listing> findByListingIdAndStatus(UUID listingId, ListingStatus status);
+
+    @Modifying
+    @Query("UPDATE Listing l SET l.viewCount = l.viewCount + 1 WHERE l.listingId = :id")
+    void incrementViewCount(@Param("id") UUID id);
 
 }
