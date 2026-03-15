@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -27,7 +26,7 @@ public interface WardRepository extends JpaRepository<Ward, UUID> {
         ORDER BY CAST(w.geolocation AS geography) <-> CAST(ST_MakePoint(:lng, :lat) AS geography)
         LIMIT 1
         """, nativeQuery = true)
-    Optional<Object[]> findNearestWard(@Param("lat") double lat, @Param("lng") double lng);
+    List<Object[]> findNearestWard(@Param("lat") double lat, @Param("lng") double lng);
 
     // Wards within radius (for nearby lookup)
     @Query(value = """

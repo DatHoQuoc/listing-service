@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.dathq.swd302.listingservice.dto.LocationDtos.*;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -39,8 +38,9 @@ public class LocationServiceSpecific {
             int poiLimit) {
         validateCoordinates(lat, lng);
 
-        Object[] wardRow = wardRepository.findNearestWard(lat, lng)
-                .orElseThrow(() -> new LocationNotFoundException("No nearby address found for coordinates"));
+        Object[] wardRow = wardRepository.findNearestWard(lat, lng).stream()
+            .findFirst()
+            .orElseThrow(() -> new LocationNotFoundException("No nearby address found for coordinates"));
 
         double distanceMeters = ((Number) wardRow[wardRow.length - 1]).doubleValue();
 
@@ -48,18 +48,20 @@ public class LocationServiceSpecific {
             throw new LocationNotFoundException("No address found within " + MAX_REVERSE_DISTANCE + "m");
         }
 
-        UUID wardId = UUID.fromString((String) wardRow[0].toString());
-        String wardName = (String) wardRow[1];
-        String wardCode = (String) wardRow[2];
+        UUID wardId = UUID.fromString(wardRow[0].toString());
+        String wardCode = (String) wardRow[1];
+        String wardName = (String) wardRow[3];
+        UUID provinceId = UUID.fromString(wardRow[5].toString());
 
-        // province info is joined — adjust indices to match your actual column order
-        String provinceName = (String) wardRow[8]; // adjust if needed
-        String provinceCode = (String) wardRow[9];
-        UUID provinceId = UUID.fromString(wardRow[7].toString());
+        var province = provinceRepository.findById(provinceId)
+            .orElseThrow(() -> new LocationNotFoundException("Province not found for ward " + wardId));
+        String provinceName = province.getName();
+        String provinceCode = province.getCode();
 
-        String countryName = (String) wardRow[11]; // adjust if needed
-        String countryCode = (String) wardRow[12];
-        UUID countryId = UUID.fromString(wardRow[10].toString());
+        var country = province.getCountry();
+        UUID countryId = country.getCountryId();
+        String countryName = country.getName();
+        String countryCode = country.getCode();
 
         String normalizedAddress = String.format("%s, %s, %s", wardName, provinceName, countryName);
         double confidence = Math.max(0.0, 1.0 - distanceMeters / MAX_REVERSE_DISTANCE);
