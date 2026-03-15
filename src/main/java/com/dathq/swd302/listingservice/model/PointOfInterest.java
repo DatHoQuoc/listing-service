@@ -1,6 +1,7 @@
 package com.dathq.swd302.listingservice.model;
 
 
+import com.dathq.swd302.listingservice.model.enums.PoiCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -26,13 +27,18 @@ public class PointOfInterest {
     @Column(nullable = false)
     private String name;
 
+    // ── Changed: String → enum ──
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String category;
+    private PoiCategory category;
 
     @Column(columnDefinition = "geometry(Point,4326)")
     private Point geolocation;
 
+    // ── Removed @Column: distanceMeters is computed, never stored ──
+    @Column
     private Integer distanceMeters;
+
 
     @CreationTimestamp
     private OffsetDateTime createdAt;

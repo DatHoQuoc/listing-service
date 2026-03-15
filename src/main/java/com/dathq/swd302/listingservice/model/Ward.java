@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.List;
+import org.locationtech.jts.geom.Point;
+
 @Entity
 @Table(name = "wards", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "province_id"}))
 @Data
@@ -25,6 +27,9 @@ public class Ward {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "province_id", nullable = false)
     private Province province;
+
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point geolocation;
 
     @CreationTimestamp
     private OffsetDateTime createdAt;

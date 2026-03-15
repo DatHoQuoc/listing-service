@@ -6,6 +6,7 @@ import com.dathq.swd302.listingservice.exception.UnauthorizedException;
 import com.dathq.swd302.listingservice.mapper.POIMapper;
 import com.dathq.swd302.listingservice.model.Listing;
 import com.dathq.swd302.listingservice.model.PointOfInterest;
+import com.dathq.swd302.listingservice.model.enums.PoiCategory;
 import com.dathq.swd302.listingservice.repository.ListingRepository;
 import com.dathq.swd302.listingservice.repository.PointOfInterestRepository;
 import com.dathq.swd302.listingservice.service.PointOfInterestService;
@@ -16,6 +17,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class PointOfInterestServiceImpl implements PointOfInterestService {
     private final PointOfInterestRepository poiRepository;
     private final ListingRepository listingRepository;
+    @Qualifier("POIMapperImpl")
     private final POIMapper poiMapper;
 
     @Override
@@ -47,7 +50,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
         PointOfInterest poi = new PointOfInterest();
         poi.setListing(listing);
         poi.setName(request.getName());
-        poi.setCategory(request.getCategory());
+        poi.setCategory(PoiCategory.valueOf(request.getCategory()));
         poi.setDistanceMeters(request.getDistanceMeters());
 
         if (request.getLatitude() != null && request.getLongitude() != null) {
@@ -87,7 +90,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     public List<POIResponse> getListingPOIsByCategory(UUID listingId, String category) {
         log.info("Fetching POIs for listing: {} with category: {}", listingId, category);
 
-        List<PointOfInterest> pois = poiRepository.findByListing_ListingIdAndCategoryOrderByDistanceMeters(listingId, category);
+        List<PointOfInterest> pois = poiRepository.findByListingIdAndCategory(listingId, PoiCategory.valueOf(category));
         return poiMapper.toResponseList(pois);
     }
 
@@ -110,7 +113,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
         }
 
         poi.setName(request.getName());
-        poi.setCategory(request.getCategory());
+        poi.setCategory(PoiCategory.valueOf(request.getCategory()));
         poi.setDistanceMeters(request.getDistanceMeters());
         Double latitude = request.getLatitude();
         Double longitude = request.getLongitude();

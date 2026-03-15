@@ -8,6 +8,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface POIMapper {
+    @Mapping(target = "listingId", source = "listing.listingId")
     @Mapping(target = "latitude", expression = "java(poi.getGeolocation() != null ? poi.getGeolocation().getY() : null)")
     @Mapping(target = "longitude", expression = "java(poi.getGeolocation() != null ? poi.getGeolocation().getX() : null)")
     POIResponse toResponse(PointOfInterest poi);
