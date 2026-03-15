@@ -146,8 +146,8 @@ public class ListingServiceImpl implements ListingService {
             throw new UnauthorizedException("User does not own this listing");
         }
 
-        if (listing.getStatus() != ListingStatus.DRAFT) {
-            throw new InvalidListingStateException("Only DRAFT listings can be submitted");
+        if (listing.getStatus() != ListingStatus.DRAFT && listing.getStatus() != ListingStatus.REJECTED) {
+            throw new InvalidListingStateException("Only DRAFT or REJECTED listings can be submitted");
         }
 
         // List<String> validationErrors =
@@ -482,7 +482,7 @@ public class ListingServiceImpl implements ListingService {
                     continue;
                 }
 
-                if (listing.getStatus() != ListingStatus.DRAFT) {
+                if (listing.getStatus() != ListingStatus.DRAFT && listing.getStatus() != ListingStatus.REJECTED) {
                     failed.add(new BulkSubmitFailureItem(listingId, "INVALID_STATE"));
                     continue;
                 }

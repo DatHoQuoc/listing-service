@@ -46,7 +46,7 @@ public interface ListingService {
 
     /**
      * Submit listing for review
-     * - Changes status from 'draft' to 'pending_review'
+        * - Changes status from 'draft' or 'rejected' to 'pending_review'
      * - Validates listing is complete (has images, documents, all required fields)
      * - Sets submitted_at timestamp
      * - In future: will lock credits via Credit Service
@@ -56,7 +56,7 @@ public interface ListingService {
      * @param authHeader the authorization header for credit service call
      * @return submitted listing response
      * @throws //ListingNotFoundException     if listing not found
-     * @throws //InvalidListingStateException if listing not in draft state
+    * @throws //InvalidListingStateException if listing not in draft/rejected state
      * @throws //ListingValidationException   if listing is incomplete
      */
     ListingResponse submitListing(UUID userId, UUID listingId, String authHeader);
