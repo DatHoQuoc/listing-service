@@ -5,8 +5,11 @@ import java.util.List;
 
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.BulkSubmitResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingDetailResponse;
 import com.dathq.swd302.listingservice.dto.response.ListingResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.NeedsAttentionResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.RecentListingActivityResponse;
 import com.dathq.swd302.listingservice.model.enums.ListingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -167,6 +170,12 @@ public interface ListingService {
      */
     void updateListingLocation(UUID userId, UUID listingId, UUID wardId, String streetAddress,
             Double latitude, Double longitude);
+
+    NeedsAttentionResponse getNeedsAttention(UUID userId, int limit);
+
+    RecentListingActivityResponse getRecentListings(UUID userId, int limit);
+
+    BulkSubmitResponse bulkSubmit(UUID userId, List<UUID> listingIds, String authHeader);
 
 
 

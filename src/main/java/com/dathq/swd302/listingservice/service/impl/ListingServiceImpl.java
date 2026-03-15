@@ -1,6 +1,12 @@
 package com.dathq.swd302.listingservice.service.impl;
 
 import com.dathq.swd302.listingservice.common.Common;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.BulkSubmitFailureItem;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.BulkSubmitResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.NeedsAttentionItem;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.NeedsAttentionResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.RecentListingActivityResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.RecentListingItem;
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
 import com.dathq.swd302.listingservice.dto.request.LockCreditRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
@@ -25,9 +31,12 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.locationtech.jts.geom.Point;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -368,5 +377,126 @@ public class ListingServiceImpl implements ListingService {
         listingRepository.save(listing);
 
         log.info("Location updated for listing: {}", listingId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public NeedsAttentionResponse getNeedsAttention(UUID userId, int limit) {
+        int effectiveLimit = normalizeLimit(limit, 10, 50);
+        Page<Listing> page = listingRepository.findByUserIdAndStatusOrderByUpdatedAtDesc(
+                userId,
+                ListingStatus.REJECTED,
+                PageRequest.of(0, effectiveLimit)
+        );
+
+        List<NeedsAttentionItem> items = page.getContent().stream()
+                .map(listing -> new NeedsAttentionItem(
+                        listing.getListingId(),
+                        listing.getTitle(),
+                        listing.getStatus(),
+                        listing.getRejectionReason(),
+                        listing.getUpdatedAt()
+                ))
+                .toList();
+
+        return new NeedsAttentionResponse(items);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RecentListingActivityResponse getRecentListings(UUID userId, int limit) {
+        int effectiveLimit = normalizeLimit(limit, 10, 50);
+        Page<Listing> page = listingRepository.findByUserIdAndStatusNotOrderByUpdatedAtDesc(
+                userId,
+                ListingStatus.DELETED,
+                PageRequest.of(0, effectiveLimit)
+        );
+
+        List<RecentListingItem> items = page.getContent().stream()
+                .map(listing -> new RecentListingItem(
+                        listing.getListingId(),
+                        listing.getTitle(),
+                        listing.getStatus(),
+                        listing.getViewCount(),
+                        listing.getUpdatedAt()
+                ))
+                .toList();
+
+        return new RecentListingActivityResponse(items);
+    }
+
+    @Override
+    public BulkSubmitResponse bulkSubmit(UUID userId, List<UUID> listingIds, String authHeader) {
+        List<UUID> submitted = new ArrayList<>();
+        List<BulkSubmitFailureItem> failed = new ArrayList<>();
+
+        if (listingIds == null || listingIds.isEmpty()) {
+            return new BulkSubmitResponse(submitted, List.of(new BulkSubmitFailureItem(null, "EMPTY_REQUEST")));
+        }
+
+        for (UUID listingId : new LinkedHashSet<>(listingIds)) {
+            if (listingId == null) {
+                failed.add(new BulkSubmitFailureItem(null, "INVALID_LISTING_ID"));
+                continue;
+            }
+
+            try {
+                Listing listing = listingRepository.findById(listingId)
+                        .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
+
+                if (!listing.getUserId().equals(userId)) {
+                    failed.add(new BulkSubmitFailureItem(listingId, "UNAUTHORIZED"));
+                    continue;
+                }
+
+                if (listing.getStatus() != ListingStatus.DRAFT) {
+                    failed.add(new BulkSubmitFailureItem(listingId, "INVALID_STATE"));
+                    continue;
+                }
+
+                if (!hasMinimumSubmissionMedia(listingId)) {
+                    failed.add(new BulkSubmitFailureItem(listingId, "INCOMPLETE_MEDIA"));
+                    continue;
+                }
+
+                submitListing(userId, listingId, authHeader);
+                submitted.add(listingId);
+
+            } catch (Exception exception) {
+                failed.add(new BulkSubmitFailureItem(listingId, determineBulkFailureCode(exception)));
+            }
+        }
+
+        return new BulkSubmitResponse(submitted, failed);
+    }
+
+    private boolean hasMinimumSubmissionMedia(UUID listingId) {
+        Integer imageCount = imageService.countListingImages(listingId);
+        boolean hasRequiredDocument = documentService.hasRequiredDocuments(listingId);
+        return imageCount != null && imageCount > 0 && hasRequiredDocument;
+    }
+
+    private static int normalizeLimit(int limit, int defaultValue, int maxValue) {
+        int requested = limit <= 0 ? defaultValue : limit;
+        return Math.min(requested, maxValue);
+    }
+
+    private String determineBulkFailureCode(Exception exception) {
+        if (exception instanceof ListingNotFoundException) {
+            return "LISTING_NOT_FOUND";
+        }
+        if (exception instanceof UnauthorizedException) {
+            return "UNAUTHORIZED";
+        }
+        if (exception instanceof InvalidListingStateException) {
+            return "INVALID_STATE";
+        }
+        if (exception instanceof InsufficientCreditException) {
+            return "INSUFFICIENT_CREDIT";
+        }
+        if (exception instanceof ListingValidationException) {
+            return "INCOMPLETE_MEDIA";
+        }
+        return "SUBMIT_FAILED";
     }
 }

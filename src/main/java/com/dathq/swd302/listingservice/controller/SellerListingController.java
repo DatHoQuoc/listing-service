@@ -1,5 +1,9 @@
 package com.dathq.swd302.listingservice.controller;
 
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.BulkSubmitResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.NeedsAttentionResponse;
+import com.dathq.swd302.listingservice.dto.SellerListingFeedDtos.RecentListingActivityResponse;
+import com.dathq.swd302.listingservice.dto.request.BulkSubmitListingsRequest;
 import com.dathq.swd302.listingservice.dto.request.CreateListingRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingLocationRequest;
 import com.dathq.swd302.listingservice.dto.request.UpdateListingRequest;
@@ -71,6 +75,22 @@ public class SellerListingController {
         return ResponseEntity.ok(sellerListingService.getMyListingsByStatus(claims.getUserId(), status));
     }
 
+    @GetMapping("/needs-attention")
+    public ResponseEntity<NeedsAttentionResponse> getNeedsAttention(
+            @JwtUser JwtClaims claims,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        return ResponseEntity.ok(sellerListingService.getNeedsAttention(claims.getUserId(), limit));
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<RecentListingActivityResponse> getRecentListings(
+            @JwtUser JwtClaims claims,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        return ResponseEntity.ok(sellerListingService.getRecentListings(claims.getUserId(), limit));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ListingDetailResponse> getListingDetails(
             @PathVariable UUID id,
@@ -96,6 +116,17 @@ public class SellerListingController {
             @PathVariable UUID id) {
 
         return ResponseEntity.ok(listingService.cancelSubmission(claims.getUserId(), id));
+    }
+
+    @PostMapping("/bulk-submit")
+    public ResponseEntity<BulkSubmitResponse> bulkSubmitDrafts(
+            @JwtUser JwtClaims claims,
+            @Valid @RequestBody BulkSubmitListingsRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+
+        return ResponseEntity.ok(
+                sellerListingService.bulkSubmit(claims.getUserId(), request.getListingIds(), authHeader)
+        );
     }
 
     // --- 4. Sub-resource Updates (Amenities & Location) ---

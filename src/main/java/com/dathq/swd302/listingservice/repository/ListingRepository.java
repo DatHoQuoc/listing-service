@@ -38,6 +38,10 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
     List<Listing> findByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, ListingStatus status);
 
+    Page<Listing> findByUserIdAndStatusOrderByUpdatedAtDesc(UUID userId, ListingStatus status, Pageable pageable);
+
+    Page<Listing> findByUserIdAndStatusNotOrderByUpdatedAtDesc(UUID userId, ListingStatus status, Pageable pageable);
+
     Page<Listing> findByStatus(ListingStatus listingStatus, Pageable pageable);
 
     Optional<Listing> findByListingIdAndStatus(UUID listingId, ListingStatus status);
