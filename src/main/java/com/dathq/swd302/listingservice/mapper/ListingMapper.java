@@ -45,8 +45,17 @@ public interface ListingMapper {
     @Mapping(target = "country.countryId", source = "countryId")
     Listing toEntity(CreateListingRequest request);
 
+    @Mapping(target = "wardId", source = "ward.wardId")
+    @Mapping(target = "provinceId", source = "province.provinceId")
+    @Mapping(target = "countryId", source = "country.countryId")
+    @Mapping(target = "isFreePost", expression = "java(listing.isFreePost())")
     ListingResponse toResponse(Listing listing);
 
+    @Mapping(target = "wardId", source = "ward.wardId")
+    @Mapping(target = "provinceId", source = "province.provinceId")
+    @Mapping(target = "countryId", source = "country.countryId")
+    @Mapping(target = "isFreePost", expression = "java(listing.isFreePost())")
+    @Mapping(target = "hasVirtualTour", expression = "java(listing.getVirtualTour() != null)")
     ListingDetailResponse toDetailResponse(Listing listing);
 
     List<ListingResponse> toResponseList(List<Listing> listings);
@@ -69,6 +78,9 @@ public interface ListingMapper {
     @Mapping(target = "reviewedAt", ignore = true)
     @Mapping(target = "publishedAt", ignore = true)
     @Mapping(target = "expiredAt", ignore = true)
+    @Mapping(target = "ward.wardId", source = "wardId")
+    @Mapping(target = "province.provinceId", source = "provinceId")
+    @Mapping(target = "country.countryId", source = "countryId")
     void updateEntityFromRequest(UpdateListingRequest request, @MappingTarget Listing listing);
 
     default ListingType mapListingType(String type) {

@@ -160,7 +160,8 @@ public class SellerListingController {
 
     // --- 5. Delete ---
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping({"/draft/{id}", "/{id}"})
+    @Operation(summary = "Delete draft", description = "Soft deletes a draft listing owned by the current seller")
     public ResponseEntity<Void> deleteDraft(
             @JwtUser JwtClaims claims,
             @PathVariable UUID id) {
