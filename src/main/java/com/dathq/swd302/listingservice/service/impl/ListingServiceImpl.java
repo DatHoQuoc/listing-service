@@ -25,6 +25,7 @@ import com.dathq.swd302.listingservice.repository.ListingRepository;
 import com.dathq.swd302.listingservice.repository.VirtualTourRepository;
 import com.dathq.swd302.listingservice.repository.WardRepository;
 import com.dathq.swd302.listingservice.service.*;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
@@ -59,6 +60,7 @@ public class ListingServiceImpl implements ListingService {
     private final AIAnalysisProducerService aiAnalysisProducerService;
     private final CreditServiceClient creditServiceClient;
     private final VirtualTourRepository virtualTourRepository;
+
     @Override
     public ListingResponse createDraft(UUID userId, CreateListingRequest request) {
         log.info("Creating draft listing for user: {}", userId);
@@ -159,24 +161,43 @@ public class ListingServiceImpl implements ListingService {
         int listingType = virtualTourRepository
                 .findByListing_ListingId(listingId)
                 .isPresent() ? 2 : 1;
-        // 2. Lock credit via HTTP (sync) — fail fast before saving
-        CreditLockResponse creditLock = creditServiceClient.lockCreditForPost(
-                authHeader,
-                new LockCreditRequest(listingId.toString(), listingType));
+        // 2. Lock credit via HTTP (sync) — fail fast before saving,
+        // except conflict (409) where a lock may already exist.
+        CreditLockResponse creditLock = null;
+        try {
+            creditLock = creditServiceClient.lockCreditForPost(
+                    authHeader,
+                    new LockCreditRequest(listingId.toString(), listingType));
 
-        if (!creditLock.success()) {
-            throw new InsufficientCreditException(creditLock.message());
+            if (!creditLock.success()) {
+                throw new InsufficientCreditException(creditLock.message());
+            }
+        } catch (FeignException exception) {
+            String responseBody = exception.contentUTF8();
+            if (exception.status() == 409) {
+                log.warn("Credit lock conflict for listing: {}. Continue submission. Response: {}",
+                        listingId, responseBody);
+            } else {
+                throw exception;
+            }
         }
         listing.setStatus(ListingStatus.PENDING_REVIEW);
         listing.setSubmittedAt(OffsetDateTime.now());
         listing.setUpdatedAt(OffsetDateTime.now());
-        listing.setFreePost(creditLock.freePost());
-        listing.setCreditsLocked(creditLock.creditCost()); // 0 or 10
+
+        if (creditLock != null) {
+            listing.setFreePost(creditLock.freePost());
+            listing.setCreditsLocked(creditLock.creditCost()); // 0 or 10
+        }
 
         Listing submittedListing = listingRepository.save(listing);
         aiAnalysisProducerService.sendComprehensiveAnalysisRequest(userId, submittedListing);
-        log.info("Listing submitted successfully: {}, creditCost: {}, freePost: {}",
-                listingId, creditLock.creditCost(), creditLock.freePost());
+        if (creditLock != null) {
+            log.info("Listing submitted successfully: {}, creditCost: {}, freePost: {}",
+                    listingId, creditLock.creditCost(), creditLock.freePost());
+        } else {
+            log.info("Listing submitted successfully after lock conflict (409): {}", listingId);
+        }
 
         return listingMapper.toResponse(submittedListing);
     }
@@ -235,8 +256,8 @@ public class ListingServiceImpl implements ListingService {
         log.info("Fetching all listings for user: {}", userId);
 
         List<Listing> listings = listingRepository.findByUserIdAndStatusNotOrderByCreatedAtDesc(
-            userId,
-            ListingStatus.DELETED);
+                userId,
+                ListingStatus.DELETED);
 
         return listings.stream()
                 .map(listing -> {
@@ -264,7 +285,6 @@ public class ListingServiceImpl implements ListingService {
             log.info("No listings found for user: {}", userId);
             return Page.empty(pageable);
         }
-
 
         return listings.map(listing -> {
             ListingResponse response = listingMapper.toResponse(listing);
@@ -419,8 +439,7 @@ public class ListingServiceImpl implements ListingService {
         Page<Listing> page = listingRepository.findByUserIdAndStatusOrderByUpdatedAtDesc(
                 userId,
                 ListingStatus.REJECTED,
-                PageRequest.of(0, effectiveLimit)
-        );
+                PageRequest.of(0, effectiveLimit));
 
         List<NeedsAttentionItem> items = page.getContent().stream()
                 .map(listing -> new NeedsAttentionItem(
@@ -428,8 +447,7 @@ public class ListingServiceImpl implements ListingService {
                         listing.getTitle(),
                         listing.getStatus(),
                         listing.getRejectionReason(),
-                        listing.getUpdatedAt()
-                ))
+                        listing.getUpdatedAt()))
                 .toList();
 
         return new NeedsAttentionResponse(items);
@@ -442,8 +460,7 @@ public class ListingServiceImpl implements ListingService {
         Page<Listing> page = listingRepository.findByUserIdAndStatusNotOrderByUpdatedAtDesc(
                 userId,
                 ListingStatus.DELETED,
-                PageRequest.of(0, effectiveLimit)
-        );
+                PageRequest.of(0, effectiveLimit));
 
         List<RecentListingItem> items = page.getContent().stream()
                 .map(listing -> new RecentListingItem(
@@ -451,8 +468,7 @@ public class ListingServiceImpl implements ListingService {
                         listing.getTitle(),
                         listing.getStatus(),
                         listing.getViewCount(),
-                        listing.getUpdatedAt()
-                ))
+                        listing.getUpdatedAt()))
                 .toList();
 
         return new RecentListingActivityResponse(items);
