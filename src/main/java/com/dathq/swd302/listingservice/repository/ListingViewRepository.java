@@ -18,8 +18,8 @@ public interface ListingViewRepository extends JpaRepository<ListingView, UUID>{
             COUNT(*)                          AS views
         FROM listing_views
         WHERE listing_id = :listingId
-          AND (:from IS NULL OR viewed_at >= CAST(:from AS timestamptz))
-          AND (:to   IS NULL OR viewed_at <= CAST(:to   AS timestamptz))
+          AND (CAST(:from AS timestamptz) IS NULL OR viewed_at >= CAST(:from AS timestamptz))
+          AND (CAST(:to   AS timestamptz) IS NULL OR viewed_at <= CAST(:to   AS timestamptz))
         GROUP BY bucket
         ORDER BY bucket ASC
         """, nativeQuery = true)
@@ -39,8 +39,8 @@ public interface ListingViewRepository extends JpaRepository<ListingView, UUID>{
             COUNT(*)                                          AS views
         FROM listing_views
         WHERE listing_id = :listingId
-          AND (:from IS NULL OR viewed_at >= CAST(:from AS timestamptz))
-          AND (:to   IS NULL OR viewed_at <= CAST(:to   AS timestamptz))
+          AND (CAST(:from AS timestamptz) IS NULL OR viewed_at >= CAST(:from AS timestamptz))
+          AND (CAST(:to   AS timestamptz) IS NULL OR viewed_at <= CAST(:to   AS timestamptz))
         GROUP BY bucket
         ORDER BY bucket ASC
         """, nativeQuery = true)
@@ -57,8 +57,8 @@ public interface ListingViewRepository extends JpaRepository<ListingView, UUID>{
         FROM listing_views lv
         JOIN listings l ON l.listing_id = lv.listing_id
         WHERE l.user_id = :userId
-          AND (:from IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
-          AND (:to   IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
+          AND (CAST(:from AS timestamptz) IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
+          AND (CAST(:to   AS timestamptz) IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
         GROUP BY bucket
         ORDER BY bucket ASC
         """, nativeQuery = true)
@@ -78,8 +78,8 @@ public interface ListingViewRepository extends JpaRepository<ListingView, UUID>{
         FROM listing_views lv
         JOIN listings l ON l.listing_id = lv.listing_id
         WHERE l.user_id = :userId
-          AND (:from IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
-          AND (:to   IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
+          AND (CAST(:from AS timestamptz) IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
+          AND (CAST(:to   AS timestamptz) IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
         GROUP BY bucket
         ORDER BY bucket ASC
         """, nativeQuery = true)
@@ -94,8 +94,8 @@ public interface ListingViewRepository extends JpaRepository<ListingView, UUID>{
         FROM listing_views lv
         JOIN listings l ON l.listing_id = lv.listing_id
         WHERE l.user_id = :userId
-          AND (:from IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
-          AND (:to   IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
+          AND (CAST(:from AS timestamptz) IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
+          AND (CAST(:to   AS timestamptz) IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
         """, nativeQuery = true)
     long countOwnerViewsBetween(
             @Param("userId") UUID userId,
@@ -111,8 +111,8 @@ public interface ListingViewRepository extends JpaRepository<ListingView, UUID>{
         FROM listing_views lv
         JOIN listings l ON l.listing_id = lv.listing_id
         WHERE l.user_id = :userId
-          AND (:from IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
-          AND (:to   IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
+          AND (CAST(:from AS timestamptz) IS NULL OR lv.viewed_at >= CAST(:from AS timestamptz))
+          AND (CAST(:to   AS timestamptz) IS NULL OR lv.viewed_at <= CAST(:to   AS timestamptz))
         GROUP BY l.listing_id, l.title
         ORDER BY views DESC, l.title ASC
         LIMIT :limit
