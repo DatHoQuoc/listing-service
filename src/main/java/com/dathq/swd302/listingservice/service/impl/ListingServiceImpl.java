@@ -311,11 +311,15 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     @Transactional(readOnly = true)
-    public ListingDetailResponse getListingById(UUID listingId, UUID userId) {
+    public ListingDetailResponse getListingById(UUID listingId, UUID userId, String role) {
         log.info("Fetching listing details: {} for user: {}", listingId, userId);
 
-        Listing listing = listingRepository.findByListingIdAndUserId(listingId, userId)
-                .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
+        boolean isPrivileged = "STAFF".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
+        Listing listing = isPrivileged
+                ? listingRepository.findById(listingId)
+                        .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId))
+                : listingRepository.findByListingIdAndUserId(listingId, userId)
+                        .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
 
         if (listing.getStatus() == ListingStatus.DELETED) {
             throw new ListingNotFoundException("Listing not found with id: " + listingId);

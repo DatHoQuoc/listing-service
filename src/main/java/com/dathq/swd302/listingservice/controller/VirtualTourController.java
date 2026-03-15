@@ -41,7 +41,7 @@ public class VirtualTourController {
             @PathVariable UUID listingId,
             @JwtUser JwtClaims claims) {
 
-        return ResponseEntity.ok(virtualTourService.getVirtualTour(claims.getUserId(), listingId));
+        return ResponseEntity.ok(virtualTourService.getVirtualTour(claims.getUserId(), listingId, claims.getRole()));
     }
 
     @DeleteMapping

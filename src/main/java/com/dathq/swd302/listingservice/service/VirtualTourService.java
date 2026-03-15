@@ -33,7 +33,7 @@ public interface VirtualTourService {
      * @return virtual tour with scenes
      * @throws //VirtualTourNotFoundException if tour doesn't exist
      */
-    VirtualTourResponse getVirtualTour(UUID userId, UUID listingId);
+    VirtualTourResponse getVirtualTour(UUID userId, UUID listingId, String role);
 
     /**
      * Delete virtual tour

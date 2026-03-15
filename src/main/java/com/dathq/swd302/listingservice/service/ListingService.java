@@ -125,7 +125,7 @@ public interface ListingService {
      * @throws //ListingNotFoundException if listing not found
      * @throws //UnauthorizedException    if user doesn't own listing
      */
-    ListingDetailResponse getListingById(UUID userId, UUID listingId);
+    ListingDetailResponse getListingById(UUID userId, UUID listingId, String role);
 
     /**
      * Delete a draft listing

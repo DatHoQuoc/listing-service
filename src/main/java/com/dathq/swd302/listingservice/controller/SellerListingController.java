@@ -96,7 +96,7 @@ public class SellerListingController {
             @PathVariable UUID id,
             @JwtUser JwtClaims claims) {
 
-        return ResponseEntity.ok(sellerListingService.getListingById(id, claims.getUserId()));
+        return ResponseEntity.ok(sellerListingService.getListingById(id, claims.getUserId(), claims.getRole()));
     }
 
     // --- 3. Submission Workflow ---

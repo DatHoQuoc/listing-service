@@ -76,11 +76,12 @@ public class VirtualTourServiceImpl implements VirtualTourService {
 
     @Override
     @Transactional(readOnly = true)
-    public VirtualTourResponse getVirtualTour(UUID userId, UUID listingId) {
+    public VirtualTourResponse getVirtualTour(UUID userId, UUID listingId, String role) {
         Listing listing = listingRepository.findById(listingId)
                 .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
 
-        if (!listing.getUserId().equals(userId)) {
+        boolean isPrivileged = "STAFF".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
+        if (!isPrivileged && !listing.getUserId().equals(userId)) {
             throw new UnauthorizedException("User does not own this listing");
         }
 
