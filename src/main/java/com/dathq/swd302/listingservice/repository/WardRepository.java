@@ -21,21 +21,21 @@ public interface WardRepository extends JpaRepository<Ward, UUID> {
 
     // Nearest ward to a point (for reverse geocoding)
     @Query(value = """
-        SELECT w.*, ST_Distance(w.geolocation::geography, ST_MakePoint(:lng, :lat)::geography) AS distance
+        SELECT w.*, ST_Distance(CAST(w.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography)) AS distance
         FROM wards w
         WHERE w.geolocation IS NOT NULL
-        ORDER BY w.geolocation <-> ST_MakePoint(:lng, :lat)::geography
+        ORDER BY CAST(w.geolocation AS geography) <-> CAST(ST_MakePoint(:lng, :lat) AS geography)
         LIMIT 1
         """, nativeQuery = true)
     Optional<Object[]> findNearestWard(@Param("lat") double lat, @Param("lng") double lng);
 
     // Wards within radius (for nearby lookup)
     @Query(value = """
-        SELECT w.*, ST_Distance(w.geolocation::geography, ST_MakePoint(:lng, :lat)::geography) AS distance
+                SELECT w.*, ST_Distance(CAST(w.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography)) AS distance
         FROM wards w
         WHERE w.geolocation IS NOT NULL
-          AND ST_DWithin(w.geolocation::geography, ST_MakePoint(:lng, :lat)::geography, :radiusMeters)
-        ORDER BY w.geolocation <-> ST_MakePoint(:lng, :lat)::geography
+                    AND ST_DWithin(CAST(w.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography), :radiusMeters)
+                ORDER BY CAST(w.geolocation AS geography) <-> CAST(ST_MakePoint(:lng, :lat) AS geography)
         LIMIT :limit
         """, nativeQuery = true)
     List<Object[]> findWardsNearby(
@@ -59,7 +59,7 @@ public interface WardRepository extends JpaRepository<Ward, UUID> {
         ORDER BY
             similarity(unaccent(lower(w.name)), unaccent(lower(:q))) DESC,
             CASE WHEN :lat IS NOT NULL AND w.geolocation IS NOT NULL
-                 THEN ST_Distance(w.geolocation::geography, ST_MakePoint(:lng, :lat)::geography)
+                  THEN ST_Distance(CAST(w.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography))
                  ELSE 0 END ASC
         LIMIT :limit
         """, nativeQuery = true)

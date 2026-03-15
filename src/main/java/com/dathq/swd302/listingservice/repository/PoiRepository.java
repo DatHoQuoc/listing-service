@@ -14,11 +14,11 @@ public interface PoiRepository extends JpaRepository<PointOfInterest, UUID> {
 
     // Nearest POIs to a point (for reverse geocoding pois field)
     @Query(value = """
-        SELECT p.*, ST_Distance(p.geolocation::geography, ST_MakePoint(:lng, :lat)::geography) AS distance
+                SELECT p.*, ST_Distance(CAST(p.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography)) AS distance
         FROM points_of_interest p
         WHERE p.geolocation IS NOT NULL
-          AND ST_DWithin(p.geolocation::geography, ST_MakePoint(:lng, :lat)::geography, :radiusMeters)
-        ORDER BY p.geolocation <-> ST_MakePoint(:lng, :lat)::geography
+                    AND ST_DWithin(CAST(p.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography), :radiusMeters)
+                ORDER BY CAST(p.geolocation AS geography) <-> CAST(ST_MakePoint(:lng, :lat) AS geography)
         LIMIT :limit
         """, nativeQuery = true)
     List<Object[]> findPoisNearby(
@@ -39,7 +39,7 @@ public interface PoiRepository extends JpaRepository<PointOfInterest, UUID> {
         ORDER BY
             similarity(unaccent(lower(p.name)), unaccent(lower(:q))) DESC,
             CASE WHEN :lat IS NOT NULL AND p.geolocation IS NOT NULL
-                 THEN ST_Distance(p.geolocation::geography, ST_MakePoint(:lng, :lat)::geography)
+                  THEN ST_Distance(CAST(p.geolocation AS geography), CAST(ST_MakePoint(:lng, :lat) AS geography))
                  ELSE 0 END ASC
         LIMIT :limit
         """, nativeQuery = true)
