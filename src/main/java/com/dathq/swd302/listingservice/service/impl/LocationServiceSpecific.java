@@ -194,12 +194,17 @@ public class LocationServiceSpecific {
     }
 
     private SearchItem toWardSearchItem(Object[] row, String q) {
+        // row: ward_id, code, created_at, name, updated_at, province_id, ..., score, lng, lat
         UUID id = UUID.fromString(row[0].toString());
-        String name = (String) row[1];
+        String name = (String) row[3];
+        UUID provinceId = UUID.fromString(row[5].toString());
+        String provinceName = provinceRepository.findById(provinceId)
+            .map(province -> province.getName())
+            .orElseThrow(() -> new LocationNotFoundException("Province not found for ward " + id));
         double score = row[row.length - 3] != null ? ((Number) row[row.length - 3]).doubleValue() : 0.5;
         double lng = row[row.length - 2] != null ? ((Number) row[row.length - 2]).doubleValue() : 0;
         double lat = row[row.length - 1] != null ? ((Number) row[row.length - 1]).doubleValue() : 0;
-        return new SearchItem(LocationType.WARD, id, name, name + ", Vietnam",
+        return new SearchItem(LocationType.WARD, id, name, name + ", " + provinceName,
                 lat, lng, Math.round(score * 100.0) / 100.0, highlight(name, q));
     }
 
