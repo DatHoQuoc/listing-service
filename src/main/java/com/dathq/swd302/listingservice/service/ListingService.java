@@ -75,6 +75,17 @@ public interface ListingService {
     ListingResponse cancelSubmission(UUID userId, UUID listingId);
 
     /**
+     * Unpublish a listing
+     * - Changes status from 'published' to 'archived'
+     * - Keeps ownership constraints
+     *
+     * @param userId    the seller's user ID
+     * @param listingId the listing to unpublish
+     * @return unpublished listing response
+     */
+    ListingResponse unpublishListing(UUID userId, UUID listingId);
+
+    /**
      * Get all listings for a user (all statuses)
      * - Returns user's listings sorted by created_at DESC
      * - Includes draft, pending, published, rejected, etc.

@@ -118,6 +118,15 @@ public class SellerListingController {
         return ResponseEntity.ok(listingService.cancelSubmission(claims.getUserId(), id));
     }
 
+    @PutMapping("/{id}/unpublish")
+    @Operation(summary = "Unpublish listing", description = "Moves a published listing to archived status")
+    public ResponseEntity<ListingResponse> unpublishListing(
+            @JwtUser JwtClaims claims,
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(listingService.unpublishListing(claims.getUserId(), id));
+    }
+
     @PostMapping("/bulk-submit")
     public ResponseEntity<BulkSubmitResponse> bulkSubmitDrafts(
             @JwtUser JwtClaims claims,

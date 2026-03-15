@@ -209,10 +209,34 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
+    public ListingResponse unpublishListing(UUID userId, UUID listingId) {
+        log.info("Unpublishing listing: {} by user: {}", listingId, userId);
+
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
+
+        if (!listing.getUserId().equals(userId)) {
+            throw new UnauthorizedException("User does not own this listing");
+        }
+
+        if (listing.getStatus() != ListingStatus.PUBLISHED) {
+            throw new InvalidListingStateException("Only PUBLISHED listings can be unpublished");
+        }
+
+        listing.setStatus(ListingStatus.ARCHIVED);
+        listing.setUpdatedAt(OffsetDateTime.now());
+
+        Listing unpublishedListing = listingRepository.save(listing);
+        return listingMapper.toResponse(unpublishedListing);
+    }
+
+    @Override
     public java.util.List<ListingResponse> getMyListings(UUID userId) {
         log.info("Fetching all listings for user: {}", userId);
 
-        List<Listing> listings = listingRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<Listing> listings = listingRepository.findByUserIdAndStatusNotOrderByCreatedAtDesc(
+            userId,
+            ListingStatus.DELETED);
 
         return listings.stream()
                 .map(listing -> {
@@ -234,7 +258,7 @@ public class ListingServiceImpl implements ListingService {
             org.springframework.data.domain.Pageable pageable) {
         log.info("Fetching paginated listings for user: {}", userId);
 
-        Page<Listing> listings = listingRepository.findByUserId(userId, pageable);
+        Page<Listing> listings = listingRepository.findByUserIdAndStatusNot(userId, ListingStatus.DELETED, pageable);
 
         if (listings.isEmpty()) {
             log.info("No listings found for user: {}", userId);
@@ -257,6 +281,10 @@ public class ListingServiceImpl implements ListingService {
     public java.util.List<ListingResponse> getMyListingsByStatus(UUID userId, ListingStatus status) {
         log.info("Fetching listings for user: {} with status: {}", userId, status);
 
+        if (status == ListingStatus.DELETED) {
+            return java.util.Collections.emptyList();
+        }
+
         List<Listing> listings = listingRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, status);
         return listingMapper.toResponseList(listings);
     }
@@ -268,6 +296,11 @@ public class ListingServiceImpl implements ListingService {
 
         Listing listing = listingRepository.findByListingIdAndUserId(listingId, userId)
                 .orElseThrow(() -> new ListingNotFoundException("Listing not found with id: " + listingId));
+
+        if (listing.getStatus() == ListingStatus.DELETED) {
+            throw new ListingNotFoundException("Listing not found with id: " + listingId);
+        }
+
         boolean exists = listingRepository.existsById(listingId);
 
         log.info("Listing exists: {}", exists);
